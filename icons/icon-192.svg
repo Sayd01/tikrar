@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="29" fill="url(#bg)"/>
+  <text x="50%" y="81" text-anchor="middle" dominant-baseline="central"
+        font-family="'Traditional Arabic','Noto Naskh Arabic',serif"
+        font-size="86" fill="white" font-weight="bold">ت</text>
+  <text x="50%" y="138" text-anchor="middle" dominant-baseline="central"
+        font-family="system-ui,sans-serif"
+        font-size="17" fill="rgba(255,255,255,0.85)" font-weight="600">TIKRAR</text>
+</svg>

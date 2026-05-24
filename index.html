@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0E4231">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>تكرار · Tikrar</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: {
+      cream:  { 50:'#FDFBF6', 100:'#FAF6EC', 200:'#F4ECD9', 300:'#E9DDBF' },
+      forest: { 50:'#EEF7F1', 100:'#D6ECDF', 200:'#ABD8BE', 300:'#7CC09B', 400:'#52A57A', 500:'#308A60', 600:'#1F6E4B', 700:'#15573B', 800:'#0E4231', 900:'#073026' },
+      gold:   { 50:'#FCF7EB', 100:'#F8ECCC', 200:'#F1DA99', 300:'#E6C36A', 400:'#D4A574', 500:'#B98947', 600:'#946930', 700:'#6F4E22' }
+    } } } };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap');
+
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #FAF6EC;
+      color: #0E4231;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.005em;
+    }
+    .arabic { font-family: 'Amiri', serif; }
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    /* ===== HEADER ===== */
+    .hdr {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(253, 251, 246, 0.92);
+      backdrop-filter: saturate(160%) blur(14px);
+      -webkit-backdrop-filter: saturate(160%) blur(14px);
+      border-bottom: 1px solid rgba(14,66,49,0.08);
+    }
+    .hdr-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; max-width: 640px; margin: 0 auto; }
+    .hdr-title { display: flex; align-items: baseline; gap: 8px; }
+    .hdr-title .arabic { font-size: 22px; font-weight: 700; color: #0E4231; line-height: 1; }
+    .hdr-counter {
+      font-size: 11px; font-weight: 700; color: #15573B;
+      background: rgba(48,138,96,0.1);
+      padding: 3px 10px; border-radius: 999px;
+      letter-spacing: 0.02em;
+      cursor: pointer; border: none;
+      transition: background .15s;
+    }
+    .hdr-counter:hover { background: rgba(48,138,96,0.18); }
+    .hdr-actions { display: flex; gap: 2px; }
+    .hdr-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #15573B; background: transparent; border: none;
+      cursor: pointer; transition: background .15s;
+    }
+    .hdr-btn:hover { background: rgba(48,138,96,0.08); }
+
+    /* ===== LEGEND ===== */
+    .legend {
+      position: sticky; top: 56px; z-index: 30;
+      background: rgba(250, 246, 236, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(14,66,49,0.06);
+      max-width: 640px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: 38px 64px 1fr 78px;
+      gap: 10px; align-items: center;
+      padding: 8px 16px;
+      font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(14,66,49,0.42);
+    }
+    .legend > div:last-child { text-align: right; }
+
+    /* ===== ROWS ===== */
+    main { max-width: 640px; margin: 0 auto; padding-bottom: 80px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 38px 64px 1fr 78px;
+      gap: 10px; align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(14,66,49,0.05);
+      cursor: pointer;
+      background: white;
+      transition: background .15s;
+    }
+    .row:active { background: rgba(14,66,49,0.03); }
+    .row.done {
+      background: linear-gradient(90deg, rgba(48,138,96,0.07), rgba(48,138,96,0.02));
+    }
+    .row.partial {
+      background: linear-gradient(90deg, rgba(212,165,116,0.08), rgba(212,165,116,0.02));
+    }
+    .row .day {
+      font-size: 11px; color: rgba(14,66,49,0.48); font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .row .page {
+      font-size: 14px; font-weight: 800; color: #0E4231;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+    }
+    .row .page .h { font-size: 11px; color: #B98947; margin-left: 2px; font-weight: 700; }
+    .row .sourate {
+      font-size: 12px; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .row .sourate.medinan { color: #308A60; }
+    .row .sourate.makkan { color: #B98947; }
+    .row .sourate.closing { color: #946930; font-style: italic; font-size: 11px; }
+    .row .dots { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+
+    .dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1.5px solid rgba(14,66,49,0.3);
+      background: white;
+      transition: all .15s;
+      flex-shrink: 0; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .dot:active { transform: scale(0.9); }
+    .dot:hover { border-color: #308A60; }
+    .dot.done {
+      background: linear-gradient(135deg, #308A60, #15573B);
+      border-color: #15573B;
+      box-shadow: 0 1px 3px rgba(48,138,96,0.4);
+    }
+    .dot.done::after {
+      content: ''; width: 6px; height: 6px;
+      background: white; border-radius: 50%;
+    }
+    .dot.na {
+      border: 1.5px dashed rgba(14,66,49,0.13); background: transparent;
+      cursor: default; opacity: 0.5;
+    }
+    .dot.na:hover { border-color: rgba(14,66,49,0.13); }
+
+    /* ===== EXPANDED ROW (current day) ===== */
+    .row.expanded {
+      display: block;
+      padding: 18px 20px 16px;
+      background: white;
+      border-left: 4px solid #308A60;
+      border-bottom: 1px solid rgba(14,66,49,0.08);
+      cursor: default;
+      box-shadow: 0 4px 20px rgba(48,138,96,0.08);
+    }
+    .row.expanded.done {
+      background: linear-gradient(135deg, #F4FAF6 0%, #E5F2EA 100%);
+    }
+    .ex-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .ex-day-label {
+      font-size: 10px; font-weight: 800; color: rgba(14,66,49,0.55);
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .ex-day-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      background: rgba(48,138,96,0.12); color: #15573B;
+    }
+    .ex-title {
+      font-size: 22px; font-weight: 800; color: #073026;
+      line-height: 1.15; margin-top: 6px; letter-spacing: -0.02em;
+    }
+    .ex-title .half { color: #B98947; font-size: 14px; font-weight: 700; margin-left: 3px; vertical-align: 1px; }
+    .ex-title .sep { color: rgba(14,66,49,0.3); margin: 0 6px; font-weight: 400; }
+    .ex-title .makkan { color: #946930; }
+    .ex-title .medinan { color: #308A60; }
+    .ex-pills { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+    .pill {
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+    .pill.makkan { background: #F8ECCC; color: #946930; }
+    .pill.medinan { background: #D6ECDF; color: #15573B; }
+    .pill.juz { background: rgba(48,138,96,0.08); color: #15573B; border: 1px solid rgba(48,138,96,0.18); }
+    .pill.closing { background: #F8ECCC; color: #946930; }
+
+    /* Tasks inside expanded */
+    .ex-tasks { margin-top: 16px; }
+    .task {
+      display: grid;
+      grid-template-columns: 32px 1fr 44px;
+      gap: 12px; align-items: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #FAF6EC;
+      border: 1px solid rgba(14,66,49,0.06);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background .25s, border-color .25s, transform .15s;
+    }
+    .task:active { transform: scale(0.99); }
+    .task.done {
+      background: linear-gradient(135deg, #EEF7F1, #D6ECDF);
+      border-color: rgba(48,138,96,0.3);
+    }
+    .task-icon {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: rgba(48,138,96,0.12); color: #15573B;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task.done .task-icon { background: #308A60; color: white; }
+    .task-icon svg { width: 16px; height: 16px; }
+    .task-body { min-width: 0; }
+    .task-label { font-size: 9px; font-weight: 800; color: rgba(14,66,49,0.55); letter-spacing: 0.16em; text-transform: uppercase; }
+    .task-content { font-size: 15px; font-weight: 700; color: #0E4231; line-height: 1.25; margin-top: 1px; letter-spacing: -0.01em; }
+    .task-extra { font-size: 11px; color: rgba(14,66,49,0.6); font-weight: 500; margin-top: 1px; line-height: 1.35; }
+
+    .switch { position: relative; width: 44px; height: 26px; border-radius: 999px; background: rgba(14,66,49,0.2); transition: background .25s; flex-shrink: 0; }
+    .switch.on { background: linear-gradient(135deg, #308A60, #15573B); box-shadow: 0 2px 6px rgba(48,138,96,0.3); }
+    .switch .knob { position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform .25s cubic-bezier(.16,1,.3,1); }
+    .switch.on .knob { transform: translateX(18px); }
+
+    .technique {
+      margin: -4px 0 10px 44px;
+      padding: 9px 12px;
+      background: rgba(212,165,116,0.08);
+      border-left: 2px solid rgba(212,165,116,0.4);
+      border-radius: 6px;
+      font-size: 11px;
+      color: rgba(14,66,49,0.82);
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    .technique strong { color: #946930; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 3px; }
+
+    .notes {
+      margin-top: 8px; width: 100%;
+      background: #FAF6EC;
+      border: 1px solid rgba(14,66,49,0.1);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 12px; color: #0E4231; font-family: inherit;
+      resize: vertical; min-height: 38px;
+    }
+    .notes:focus { outline: none; border-color: #308A60; background: white; }
+    .notes::placeholder { color: rgba(14,66,49,0.35); font-style: italic; }
+
+    /* ===== MODAL SHEETS ===== */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(7, 48, 38, 0.6);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-overlay.center { align-items: center; padding: 20px; }
+    .modal-sheet {
+      width: 100%; max-width: 480px; max-height: 88vh;
+      background: #FAF6EC;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      overflow-y: auto;
+      padding: 16px 18px 30px;
+      animation: slideUp 0.3s cubic-bezier(.16,1,.3,1);
+    }
+    .modal-overlay.center .modal-sheet { border-radius: 22px; max-width: 380px; max-height: none; padding: 22px; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-handle { width: 36px; height: 4px; background: rgba(14,66,49,0.2); border-radius: 999px; margin: 0 auto 14px; }
+    .modal-title { font-size: 16px; font-weight: 800; color: #0E4231; margin-bottom: 14px; }
+    .field-label { display: block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(14,66,49,0.55); margin-bottom: 6px; }
+    .field-input { width: 100%; background: white; border: 1px solid rgba(14,66,49,0.12); border-radius: 10px; padding: 9px 12px; font-size: 14px; font-weight: 600; color: #0E4231; font-family: inherit; font-variant-numeric: tabular-nums; }
+    .field-input:focus { outline: none; border-color: #308A60; }
+    .field-help { font-size: 11px; color: rgba(14,66,49,0.55); margin-top: 5px; }
+    .modal-card { background: white; border: 1px solid rgba(14,66,49,0.06); border-radius: 14px; padding: 14px; margin-bottom: 8px; }
+    .btn-primary { background: linear-gradient(135deg, #308A60, #15573B); color: white; font-weight: 700; padding: 11px 18px; border-radius: 12px; border: none; cursor: pointer; transition: all .2s; box-shadow: 0 4px 12px rgba(48,138,96,0.25); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-secondary { background: rgba(48,138,96,0.08); color: #15573B; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; }
+    .btn-secondary:hover { background: rgba(48,138,96,0.15); }
+    .btn-danger { background: rgba(220,38,38,0.07); color: #B91C1C; font-weight: 700; padding: 11px 16px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 13px; }
+
+    /* ===== TASK STATS BARS (par tâche) ===== */
+    .task-bar { margin-bottom: 11px; }
+    .task-bar:last-child { margin-bottom: 0; }
+    .task-bar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .task-bar-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; color: #0E4231; }
+    .task-bar-label .icon { width: 16px; height: 16px; color: #15573B; }
+    .task-bar-counts { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.65); font-variant-numeric: tabular-nums; }
+    .task-bar-counts .pct { color: #308A60; margin-left: 5px; }
+    .task-bar-track { height: 7px; background: rgba(14,66,49,0.06); border-radius: 999px; overflow: hidden; }
+    .task-bar-fill { height: 100%; background: linear-gradient(90deg, #52A57A, #15573B); border-radius: 999px; transition: width .6s cubic-bezier(.16,1,.3,1); }
+    .task-bar.gold .task-bar-fill { background: linear-gradient(90deg, #D4A574, #946930); }
+    .task-bar.gold .task-bar-counts .pct { color: #946930; }
+
+    /* ===== BREAKDOWN ROWS (bilan jours) ===== */
+    .breakdown-row { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; font-size: 12px; }
+    .breakdown-dot { width: 10px; height: 10px; border-radius: 50%; justify-self: center; }
+    .breakdown-dot.complete { background: linear-gradient(135deg, #308A60, #15573B); }
+    .breakdown-dot.partial { background: linear-gradient(135deg, #D4A574, #B98947); }
+    .breakdown-dot.empty { background: rgba(14,66,49,0.18); }
+    .breakdown-label { font-weight: 600; color: #0E4231; display: flex; align-items: center; gap: 8px; }
+    .breakdown-bar { flex: 1; height: 4px; background: rgba(14,66,49,0.06); border-radius: 999px; margin-left: 10px; overflow: hidden; max-width: 110px; }
+    .breakdown-bar > div { height: 100%; border-radius: 999px; transition: width .5s; }
+    .breakdown-count { font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.75); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+    .breakdown-count .pct { color: rgba(14,66,49,0.5); font-weight: 600; margin-left: 4px; }
+
+    /* ===== MISSED STATS ===== */
+    .missed-title { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(14,66,49,0.55); margin-bottom: 8px; }
+    .missed-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+    .missed-row > span:first-child { color: #B91C1C; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .missed-row > span:first-child .icon { color: rgba(185, 28, 28, 0.6); width: 14px; height: 14px; }
+    .missed-row > span:last-child { font-weight: 700; color: #0E4231; font-variant-numeric: tabular-nums; }
+    .missed-row.zero > span:first-child { color: rgba(48, 138, 96, 0.7); }
+    .missed-row.zero > span:first-child .icon { color: rgba(48, 138, 96, 0.5); }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-16px);
+      background: #0E4231; color: #FAF6EC;
+      padding: 9px 18px; border-radius: 999px;
+      font-size: 12px; font-weight: 700;
+      box-shadow: 0 8px 24px rgba(7,48,38,0.3);
+      opacity: 0; pointer-events: none;
+      transition: all .3s cubic-bezier(.16,1,.3,1); z-index: 60;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+    /* ===== CONFETTI ===== */
+    .confetti { position: fixed; pointer-events: none; z-index: 55; }
+
+    /* ===== FAB (back to current day) ===== */
+    .fab {
+      position: fixed; bottom: 18px; right: 18px; z-index: 35;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #308A60, #15573B);
+      color: white; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 22px rgba(7,48,38,0.35);
+      transition: transform .25s, opacity .25s;
+      opacity: 0; pointer-events: none;
+    }
+    .fab.show { opacity: 1; pointer-events: auto; }
+    .fab:active { transform: scale(0.92); }
+
+    @supports (padding: max(0px)) {
+      .fab { bottom: max(18px, env(safe-area-inset-bottom)); }
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <div class="hdr-row">
+      <div class="hdr-title">
+        <span class="arabic">تكرار</span>
+        <button class="hdr-counter tabular" onclick="jumpToCurrent()" aria-label="Aller au jour courant">
+          Jour <span id="hd-day">1</span> / 1386
+        </button>
+      </div>
+      <div class="hdr-actions">
+        <button class="hdr-btn" onclick="openStats()" aria-label="Statistiques">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-7"/></svg>
+        </button>
+        <button class="hdr-btn" onclick="openSettings()" aria-label="Paramètres">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ LEGEND ============ -->
+  <div class="legend">
+    <div>Jour</div>
+    <div>Page</div>
+    <div>Sourate</div>
+    <div>M · L · R</div>
+  </div>
+
+  <!-- ============ ROWS ============ -->
+  <main>
+    <div id="rows"></div>
+  </main>
+
+  <!-- ============ FAB ============ -->
+  <button class="fab" id="fab-current" onclick="jumpToCurrent()" aria-label="Jour courant">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 12H2M22 12h-3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2"/></svg>
+  </button>
+
+  <!-- ============ MODAL : STATS ============ -->
+  <div id="modal-stats" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-stats')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">Statistiques</h2>
+
+      <div class="modal-card" style="text-align: center; padding: 20px;">
+        <div class="field-label" style="margin-bottom: 12px;">Progression globale</div>
+        <div style="position: relative; display: inline-block;">
+          <svg width="140" height="140" viewBox="0 0 120 120" style="transform: rotate(-90deg);">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(14,66,49,0.08)" stroke-width="10"/>
+            <circle id="stats-circle" cx="60" cy="60" r="52" fill="none" stroke="url(#sg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" style="transition: stroke-dashoffset 0.8s cubic-bezier(.16,1,.3,1);"/>
+            <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#52A57A"/><stop offset="100%" stop-color="#073026"/></linearGradient></defs>
+          </svg>
+          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <span class="tabular" style="font-size: 30px; font-weight: 800; color: #073026;" id="stats-pct">0%</span>
+            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 1386</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PAR TÂCHE ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 10px;">Par tâche</div>
+        <div id="task-stats"></div>
+      </div>
+
+      <!-- ============ BILAN DES JOURS ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 4px;">
+          Bilan des jours
+          <span id="bilan-range" class="tabular" style="float: right; color: rgba(14,66,49,0.6); text-transform: none; letter-spacing: 0; font-weight: 600;">1 → 0</span>
+        </div>
+        <p style="font-size: 11px; color: rgba(14,66,49,0.55); margin-bottom: 12px;">Jusqu'au jour courant inclus</p>
+        <div id="day-breakdown"></div>
+        <div id="missed-stats" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(14,66,49,0.06);"></div>
+      </div>
+
+      <!-- ============ STATS CLASSIQUES ============ -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+        <div class="modal-card" style="margin: 0;">
+          <div class="field-label" style="margin: 0;">Pages</div>
+          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #0E4231; margin-top: 4px;" id="stats-pages">0</div>
+          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">/ 604</div>
+        </div>
+        <div class="modal-card" style="margin: 0;">
+          <div class="field-label" style="margin: 0;">Tours</div>
+          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #0E4231; margin-top: 4px;" id="stats-tours">0</div>
+          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">/ 196</div>
+        </div>
+        <div class="modal-card" style="margin: 0;">
+          <div class="field-label" style="margin: 0;">Série 🔥</div>
+          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #B98947; margin-top: 4px;" id="stats-streak">0</div>
+          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">d'affilée</div>
+        </div>
+      </div>
+
+      <div class="modal-card" style="margin-top: 8px;">
+        <div class="field-label" style="margin-bottom: 8px;">Par Juz <span id="juz-summary" class="tabular" style="float: right; color: rgba(14,66,49,0.6);">0 / 30</span></div>
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;" id="juz-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL : SETTINGS ============ -->
+  <div id="modal-settings" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-settings')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">Paramètres</h2>
+
+      <div class="modal-card">
+        <label class="field-label" for="start-date-input">Date de début</label>
+        <input type="date" id="start-date-input" class="field-input" onchange="saveStartDate(this.value)">
+      </div>
+
+      <div class="modal-card">
+        <label class="field-label" for="set-current-day">Jour courant</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="number" id="set-current-day" min="1" max="1386" class="field-input" placeholder="N°" style="flex: 1;">
+          <button class="btn-primary" onclick="settingsSetDay()" style="padding: 9px 16px;">OK</button>
+        </div>
+        <p class="field-help">1 → 1206 mémorisation · 1207 → 1386 clôture</p>
+      </div>
+
+      <div class="modal-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #0E4231;">Mode strict (R17)</div>
+            <div style="font-size: 11px; color: rgba(14,66,49,0.6); margin-top: 2px;">Bloque le passage au jour suivant tant que pas validé.</div>
+          </div>
+          <div class="switch" id="switch-strict" onclick="toggleStrict()"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 8px;">Sauvegarde</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn-secondary" onclick="exportData()" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exporter
+          </button>
+          <label class="btn-secondary" style="background: rgba(212,165,116,0.12); color: #946930; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            Importer
+            <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-card" style="border-color: rgba(220,38,38,0.15);">
+        <button class="btn-danger" onclick="resetAll()">Réinitialiser toutes les données</button>
+      </div>
+
+      <p style="text-align: center; font-size: 10px; color: rgba(14,66,49,0.35); font-weight: 600; padding: 12px 0;">
+        Tikrar · 100% hors-ligne · v3
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ MODAL : ONBOARDING ============ -->
+  <div id="onboarding" class="modal-overlay center">
+    <div class="modal-sheet">
+      <div style="text-align: center; margin-bottom: 18px;">
+        <div class="arabic" style="font-size: 36px; font-weight: 700; color: #0E4231; line-height: 1;">تكرار</div>
+        <h2 style="font-size: 16px; font-weight: 800; color: #0E4231; margin-top: 6px;">Bienvenue</h2>
+        <p style="font-size: 11px; color: rgba(14,66,49,0.65); margin-top: 4px; line-height: 1.45;">
+          Mémorisation du Coran<br>
+          1206 jours + 6 mois de clôture
+        </p>
+      </div>
+
+      <div style="background: rgba(48,138,96,0.07); border: 1px solid rgba(48,138,96,0.15); border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 11px; color: #15573B; line-height: 1.6;">
+        <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px; color: #15573B;">3 tâches par jour</div>
+        <div>📖 <strong>Mémoriser</strong> une demi-page</div>
+        <div>🔗 <strong>Liaison</strong> · réciter les dernières pages</div>
+        <div>✓ <strong>Révision</strong> · réviser l'ancien</div>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label class="field-label">Date de début</label>
+        <input type="date" id="ob-start-date" class="field-input">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label class="field-label">Jour actuel</label>
+        <input type="number" id="ob-current-day" min="1" max="1386" value="1" class="field-input">
+      </div>
+
+      <button class="btn-primary" onclick="completeOnboarding()" style="width: 100%; padding: 13px;">
+        Bismillah, commencer
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div id="toast" class="toast"><span id="toast-text"></span></div>
+
+  <script>
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  const TOTAL_MEMO = 1206;
+  const TOTAL_DAYS = 1386;
+
+  const ICONS = {
+    memo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
+    liaison: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 10a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>',
+    revision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    closing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>'
+  };
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let programData = [];
+  let currentDay = 1;
+  let progress = {};
+  let strictMode = false;
+  let _scrollObserver = null;
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  async function init() {
+    try {
+      const r = await fetch('./data/program.json');
+      programData = await r.json();
+    } catch (e) {
+      programData = generateProgramFallback();
+    }
+    loadState();
+    renderAll();
+    updateHeader();
+    setupScrollObserver();
+    setTimeout(() => scrollToDay(currentDay, false), 50);
+    maybeShowOnboarding();
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  }
+
+  // ============================================================
+  // PERSISTENCE
+  // ============================================================
+  function loadState() {
+    try {
+      currentDay = parseInt(localStorage.getItem('tikrar:currentDay')) || 1;
+      progress = JSON.parse(localStorage.getItem('tikrar:progress') || '{}');
+      strictMode = localStorage.getItem('tikrar:strict') === '1';
+      const sd = localStorage.getItem('tikrar:startDate');
+      if (sd) {
+        const el = document.getElementById('start-date-input');
+        if (el) el.value = sd;
+      }
+      const sw = document.getElementById('switch-strict');
+      if (sw) sw.classList.toggle('on', strictMode);
+    } catch (e) {
+      currentDay = 1; progress = {}; strictMode = false;
+    }
+  }
+  function saveState() {
+    localStorage.setItem('tikrar:currentDay', String(currentDay));
+    localStorage.setItem('tikrar:progress', JSON.stringify(progress));
+  }
+
+  // ============================================================
+  // FORMAT helpers
+  // ============================================================
+  function formatTask(day) {
+    const d = programData[day - 1];
+    if (!d || d.isClosing) return String(day);
+    if (!d.half) return String(d.mushafPage);
+    return d.mushafPage + ' ' + d.half;
+  }
+  function formatRange(s, e) {
+    if (!s || !e) return '—';
+    const a = formatTask(s), b = formatTask(e);
+    return a === b ? a : a + '→' + b;
+  }
+
+  // ============================================================
+  // TASKS LOGIC
+  // ============================================================
+  function getApplicableTasks(d) {
+    if (!d) return [];
+    if (d.isClosing) {
+      return [{
+        id: 'closing',
+        label: 'Clôture',
+        content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
+        extra: 'Clôture ' + d.closingTour + ' / 30 · Jour ' + d.closingDay + ' / 6',
+        icon: ICONS.closing
+      }];
+    }
+    const t = [];
+    t.push({
+      id: 'memo',
+      label: 'Mémorisation',
+      content: 'Page ' + d.mushafPage + (d.half ? ' ' + d.half : ''),
+      extra: d.sourate + ' · ' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + ' · Juz ' + d.juz,
+      icon: ICONS.memo,
+      hasTechnique: true
+    });
+    if ((d.liaisonEndDay || 0) >= 1) {
+      t.push({
+        id: 'liaison',
+        label: 'Liaison (Rabt)',
+        content: 'Pages ' + formatRange(d.liaisonStartDay, d.liaisonEndDay),
+        extra: 'Réciter sans regarder le Coran',
+        icon: ICONS.liaison
+      });
+    }
+    if ((d.tourNumber || 0) >= 1) {
+      t.push({
+        id: 'revision',
+        label: 'Révision (Murajaa)',
+        content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
+        extra: 'Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6 · sans regarder',
+        icon: ICONS.revision
+      });
+    }
+    return t;
+  }
+  function isDayComplete(day) {
+    const d = programData[day - 1];
+    if (!d) return false;
+    const tasks = getApplicableTasks(d);
+    if (!tasks.length) return false;
+    const p = progress[day] || {};
+    return tasks.every(t => p[t.id] === true);
+  }
+  function isDayPartial(day) {
+    const d = programData[day - 1];
+    if (!d) return false;
+    const tasks = getApplicableTasks(d);
+    const p = progress[day] || {};
+    const n = tasks.filter(t => p[t.id] === true).length;
+    return n > 0 && n < tasks.length;
+  }
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  function renderAll() {
+    const c = document.getElementById('rows');
+    let html = '';
+    for (let day = 1; day <= TOTAL_DAYS; day++) {
+      html += (day === currentDay) ? renderExpanded(day) : renderCompact(day);
+    }
+    c.innerHTML = html;
+  }
+
+  function renderCompact(day) {
+    const d = programData[day - 1];
+    if (!d) return '';
+    const p = progress[day] || {};
+    const done = isDayComplete(day);
+    const partial = !done && isDayPartial(day);
+
+    let pageHtml, sourateHtml, sourateCls;
+    if (d.isClosing) {
+      pageHtml = '<span class="tabular">T' + d.closingTour + '·' + d.closingDay + '</span>';
+      sourateHtml = 'Clôture';
+      sourateCls = 'closing';
+    } else {
+      pageHtml = d.mushafPage + (d.half ? '<span class="h">' + d.half + '</span>' : '');
+      sourateHtml = d.sourate;
+      sourateCls = d.revelation;
+    }
+
+    let dotsHtml = '';
+    if (d.isClosing) {
+      const isDone = p.closing === true;
+      dotsHtml = '<span class="dot na"></span><span class="dot' + (isDone ? ' done' : '') + '" onclick="event.stopPropagation();quickToggle(' + day + ',\'closing\')"></span><span class="dot na"></span>';
+    } else {
+      ['memo', 'liaison', 'revision'].forEach(tid => {
+        const applies = (tid === 'memo') ||
+          (tid === 'liaison' && (d.liaisonEndDay || 0) >= 1) ||
+          (tid === 'revision' && (d.tourNumber || 0) >= 1);
+        if (applies) {
+          const isDone = p[tid] === true;
+          dotsHtml += '<span class="dot' + (isDone ? ' done' : '') + '" onclick="event.stopPropagation();quickToggle(' + day + ',\'' + tid + '\')"></span>';
+        } else {
+          dotsHtml += '<span class="dot na"></span>';
+        }
+      });
+    }
+
+    let cls = 'row';
+    if (done) cls += ' done';
+    else if (partial) cls += ' partial';
+
+    return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setActiveDay(' + day + ')">' +
+      '<div class="day">' + day + '</div>' +
+      '<div class="page">' + pageHtml + '</div>' +
+      '<div class="sourate ' + sourateCls + '">' + sourateHtml + '</div>' +
+      '<div class="dots">' + dotsHtml + '</div>' +
+    '</div>';
+  }
+
+  function renderExpanded(day) {
+    const d = programData[day - 1];
+    if (!d) return '';
+    const p = progress[day] || {};
+    const tasks = getApplicableTasks(d);
+    const done = isDayComplete(day);
+
+    let head;
+    if (d.isClosing) {
+      head =
+        '<div class="ex-head"><span class="ex-day-label">Jour ' + day + '</span><span class="ex-day-badge">Clôture ' + d.closingTour + '/30</span></div>' +
+        '<div class="ex-title">Phase de clôture <span class="arabic" style="font-size: 18px; color: #946930;">(ختمة)</span></div>' +
+        '<div class="ex-pills"><span class="pill closing">Jour ' + d.closingDay + ' / 6</span></div>';
+    } else {
+      const revelationCls = d.revelation === 'makkan' ? 'makkan' : 'medinan';
+      head =
+        '<div class="ex-head"><span class="ex-day-label">Jour ' + day + ' / ' + TOTAL_DAYS + '</span>' +
+          (d.tourNumber > 0 ? '<span class="ex-day-badge">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '') +
+        '</div>' +
+        '<div class="ex-title">Page ' + d.mushafPage + (d.half ? '<span class="half">' + d.half + '</span>' : '') +
+          '<span class="sep">·</span><span class="' + revelationCls + '">' + d.sourate + '</span>' +
+        '</div>' +
+        '<div class="ex-pills">' +
+          '<span class="pill ' + revelationCls + '">' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + '</span>' +
+          '<span class="pill juz">Juz ' + d.juz + '</span>' +
+        '</div>';
+    }
+
+    let tasksHtml = '<div class="ex-tasks">';
+    tasks.forEach(t => {
+      const isDone = p[t.id] === true;
+      tasksHtml +=
+        '<div class="task' + (isDone ? ' done' : '') + '" onclick="toggleTask(' + day + ',\'' + t.id + '\')">' +
+          '<div class="task-icon">' + t.icon + '</div>' +
+          '<div class="task-body">' +
+            '<div class="task-label">' + t.label + '</div>' +
+            '<div class="task-content">' + t.content + '</div>' +
+            '<div class="task-extra">' + t.extra + '</div>' +
+          '</div>' +
+          '<div class="switch' + (isDone ? ' on' : '') + '"><div class="knob"></div></div>' +
+        '</div>';
+      if (t.hasTechnique) {
+        tasksHtml += '<div class="technique"><strong>Technique de mémorisation</strong>' +
+          '1. Répétition de la veille × 5 (sans regarder)<br>' +
+          '2. Écoute × 3 (en regardant le Coran)<br>' +
+          '3. Interprétation (Tafsir Al-Muyassar)<br>' +
+          '4. Enregistrement × 3 (sans regarder)<br>' +
+          '5. Répétition × 40 (la nouvelle demi-page)' +
+        '</div>';
+      }
+    });
+    tasksHtml += '</div>';
+
+    const notesHtml = '<textarea class="notes" rows="2" placeholder="Notes : erreurs récurrentes, versets difficiles…" onblur="saveNotes(' + day + ', this.value)">' + escapeHtml(p.notes || '') + '</textarea>';
+
+    let cls = 'row expanded';
+    if (done) cls += ' done';
+
+    return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '">' + head + tasksHtml + notesHtml + '</div>';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ============================================================
+  // ACTIONS
+  // ============================================================
+  function setActiveDay(newDay) {
+    if (newDay === currentDay) return;
+    if (strictMode && newDay > currentDay && !isDayComplete(currentDay)) {
+      showToast('Mode strict : termine d\'abord ce jour');
+      return;
+    }
+    const oldDay = currentDay;
+    currentDay = newDay;
+    saveState();
+    replaceRow(oldDay);
+    replaceRow(newDay);
+    updateHeader();
+    setTimeout(() => scrollToDay(newDay, true), 30);
+  }
+
+  function replaceRow(day) {
+    const el = document.getElementById('row-' + day);
+    if (!el) return;
+    const html = (day === currentDay) ? renderExpanded(day) : renderCompact(day);
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    el.parentNode.replaceChild(tmp.firstChild, el);
+    if (_scrollObserver) {
+      const newEl = document.getElementById('row-' + day);
+      if (newEl) _scrollObserver.observe(newEl);
+    }
+  }
+
+  function toggleTask(day, taskId) {
+    if (!progress[day]) progress[day] = {};
+    const wasOn = progress[day][taskId] === true;
+    progress[day][taskId] = !wasOn;
+    saveState();
+    replaceRow(day);
+    if (!wasOn && isDayComplete(day)) showConfetti();
+  }
+
+  function quickToggle(day, taskId) {
+    toggleTask(day, taskId);
+  }
+
+  function saveNotes(day, val) {
+    if (!progress[day]) progress[day] = {};
+    progress[day].notes = val;
+    saveState();
+  }
+
+  function scrollToDay(day, smooth) {
+    const el = document.getElementById('row-' + day);
+    if (el) el.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  function jumpToCurrent() {
+    scrollToDay(currentDay, true);
+  }
+
+  function updateHeader() {
+    document.getElementById('hd-day').textContent = currentDay;
+  }
+
+  // ============================================================
+  // FAB : show when current day is off-screen
+  // ============================================================
+  function setupScrollObserver() {
+    if (!('IntersectionObserver' in window)) return;
+    _scrollObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (parseInt(entry.target.dataset.day) === currentDay) {
+          document.getElementById('fab-current').classList.toggle('show', !entry.isIntersecting);
+        }
+      });
+    }, { rootMargin: '-100px 0px -100px 0px' });
+    const cur = document.getElementById('row-' + currentDay);
+    if (cur) _scrollObserver.observe(cur);
+  }
+
+  // ============================================================
+  // MODALS
+  // ============================================================
+  function openStats() {
+    updateStats();
+    renderJuzGrid();
+    document.getElementById('modal-stats').classList.add('open');
+  }
+  function openSettings() {
+    document.getElementById('set-current-day').value = currentDay;
+    document.getElementById('switch-strict').classList.toggle('on', strictMode);
+    document.getElementById('modal-settings').classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // ============================================================
+  // SETTINGS
+  // ============================================================
+  function settingsSetDay() {
+    const v = parseInt(document.getElementById('set-current-day').value);
+    if (v >= 1 && v <= TOTAL_DAYS) {
+      const oldDay = currentDay;
+      currentDay = v;
+      saveState();
+      replaceRow(oldDay);
+      replaceRow(v);
+      updateHeader();
+      closeModal('modal-settings');
+      setTimeout(() => scrollToDay(v, true), 80);
+      showToast('Jour ' + v);
+    }
+  }
+  function saveStartDate(val) {
+    localStorage.setItem('tikrar:startDate', val);
+    showToast('Date enregistrée');
+  }
+  function toggleStrict() {
+    strictMode = !strictMode;
+    localStorage.setItem('tikrar:strict', strictMode ? '1' : '0');
+    document.getElementById('switch-strict').classList.toggle('on', strictMode);
+    showToast(strictMode ? 'Mode strict activé' : 'Mode strict désactivé');
+  }
+
+  // ============================================================
+  // ONBOARDING
+  // ============================================================
+  function maybeShowOnboarding() {
+    if (!localStorage.getItem('tikrar:onboarded')) {
+      document.getElementById('onboarding').classList.add('open');
+      document.getElementById('ob-start-date').valueAsDate = new Date();
+      document.getElementById('ob-current-day').value = currentDay;
+    }
+  }
+  function completeOnboarding() {
+    const date = document.getElementById('ob-start-date').value;
+    const day = parseInt(document.getElementById('ob-current-day').value) || 1;
+    if (date) localStorage.setItem('tikrar:startDate', date);
+    if (day >= 1 && day <= TOTAL_DAYS) { currentDay = day; saveState(); }
+    localStorage.setItem('tikrar:onboarded', '1');
+    document.getElementById('onboarding').classList.remove('open');
+    renderAll();
+    setupScrollObserver();
+    setTimeout(() => scrollToDay(currentDay, false), 50);
+    updateHeader();
+  }
+
+  // ============================================================
+  // STATS
+  // ============================================================
+  function calculateStreak() {
+    let s = 0;
+    for (let d = currentDay; d >= 1; d--) {
+      if (isDayComplete(d)) s++; else break;
+    }
+    return s;
+  }
+  let _pageDays = null;
+  function getPageDays() {
+    if (!_pageDays) {
+      _pageDays = {};
+      programData.forEach(d => {
+        if (!d.isClosing) (_pageDays[d.mushafPage] ||= []).push(d.day);
+      });
+    }
+    return _pageDays;
+  }
+  function calculatePagesMemorized() {
+    const pd = getPageDays();
+    let n = 0;
+    for (const p in pd) if (pd[p].every(d => isDayComplete(d))) n++;
+    return n;
+  }
+  // ----- Calculs par tâche (sur tout le programme 1-1386) -----
+  function calcTaskStats() {
+    const s = {
+      memo:    { done: 0, total: 0 },
+      liaison: { done: 0, total: 0 },
+      revision:{ done: 0, total: 0 },
+      closing: { done: 0, total: 0 }
+    };
+    programData.forEach(d => {
+      const p = progress[d.day] || {};
+      if (d.isClosing) {
+        s.closing.total++;
+        if (p.closing === true) s.closing.done++;
+        return;
+      }
+      s.memo.total++;
+      if (p.memo === true) s.memo.done++;
+      if ((d.liaisonEndDay || 0) >= 1) {
+        s.liaison.total++;
+        if (p.liaison === true) s.liaison.done++;
+      }
+      if ((d.tourNumber || 0) >= 1) {
+        s.revision.total++;
+        if (p.revision === true) s.revision.done++;
+      }
+    });
+    return s;
+  }
+
+  // ----- Bilan des jours 1 → currentDay -----
+  function calcDayBreakdown() {
+    let complete = 0, partial = 0, empty = 0;
+    let missedMemo = 0, missedLiaison = 0, missedRevision = 0, missedClosing = 0;
+    let appliMemo = 0, appliLiaison = 0, appliRevision = 0, appliClosing = 0;
+
+    for (let day = 1; day <= currentDay; day++) {
+      const d = programData[day - 1];
+      if (!d) continue;
+      const tasks = getApplicableTasks(d);
+      const p = progress[day] || {};
+      const done = tasks.filter(t => p[t.id] === true).length;
+      if (done === tasks.length) complete++;
+      else if (done === 0) empty++;
+      else partial++;
+      // Comptage manqué par tâche
+      tasks.forEach(t => {
+        if (t.id === 'memo') { appliMemo++; if (p.memo !== true) missedMemo++; }
+        else if (t.id === 'liaison') { appliLiaison++; if (p.liaison !== true) missedLiaison++; }
+        else if (t.id === 'revision') { appliRevision++; if (p.revision !== true) missedRevision++; }
+        else if (t.id === 'closing') { appliClosing++; if (p.closing !== true) missedClosing++; }
+      });
+    }
+    return {
+      complete, partial, empty, total: currentDay,
+      missedMemo, missedLiaison, missedRevision, missedClosing,
+      appliMemo, appliLiaison, appliRevision, appliClosing
+    };
+  }
+
+  function renderTaskBars(s) {
+    const rows = [
+      { label: 'Mémorisation',   icon: ICONS.memo,     gold: false, ...s.memo },
+      { label: 'Liaison (Rabt)', icon: ICONS.liaison,  gold: false, ...s.liaison },
+      { label: 'Révision',       icon: ICONS.revision, gold: false, ...s.revision },
+      { label: 'Clôture',        icon: ICONS.closing,  gold: true,  ...s.closing }
+    ];
+    return rows.map(r => {
+      const pct = r.total > 0 ? Math.round((r.done / r.total) * 100) : 0;
+      return '<div class="task-bar' + (r.gold ? ' gold' : '') + '">' +
+        '<div class="task-bar-head">' +
+          '<div class="task-bar-label"><span class="icon">' + r.icon + '</span>' + r.label + '</div>' +
+          '<div class="task-bar-counts">' + r.done + ' / ' + r.total + '<span class="pct">' + pct + '%</span></div>' +
+        '</div>' +
+        '<div class="task-bar-track"><div class="task-bar-fill" style="width: ' + pct + '%"></div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderBreakdown(b) {
+    const max = Math.max(1, b.complete, b.partial, b.empty);
+    const pct = n => Math.round((n / b.total) * 100);
+    const bar = (n, color) => '<div class="breakdown-bar"><div style="width:' + Math.round(n/max*100) + '%; background:' + color + ';"></div></div>';
+    return '<div class="breakdown-row">' +
+        '<span class="breakdown-dot complete"></span>' +
+        '<span class="breakdown-label">Complets' + bar(b.complete, 'linear-gradient(90deg,#52A57A,#15573B)') + '</span>' +
+        '<span class="breakdown-count">' + b.complete + '<span class="pct">' + pct(b.complete) + '%</span></span>' +
+      '</div>' +
+      '<div class="breakdown-row">' +
+        '<span class="breakdown-dot partial"></span>' +
+        '<span class="breakdown-label">Partiels' + bar(b.partial, 'linear-gradient(90deg,#D4A574,#B98947)') + '</span>' +
+        '<span class="breakdown-count">' + b.partial + '<span class="pct">' + pct(b.partial) + '%</span></span>' +
+      '</div>' +
+      '<div class="breakdown-row">' +
+        '<span class="breakdown-dot empty"></span>' +
+        '<span class="breakdown-label">Rien' + bar(b.empty, 'rgba(14,66,49,0.3)') + '</span>' +
+        '<span class="breakdown-count">' + b.empty + '<span class="pct">' + pct(b.empty) + '%</span></span>' +
+      '</div>';
+  }
+
+  function renderMissed(b) {
+    const totalIncomplete = b.partial + b.empty;
+    if (totalIncomplete === 0) {
+      return '<div class="missed-title">Aucune tâche manquée jusqu\'ici ✓</div>';
+    }
+    const rows = [];
+    if (b.appliMemo > 0)     rows.push({ label: 'Mémorisations manquées', icon: ICONS.memo,     missed: b.missedMemo,     total: b.appliMemo });
+    if (b.appliLiaison > 0)  rows.push({ label: 'Liaisons manquées',      icon: ICONS.liaison,  missed: b.missedLiaison,  total: b.appliLiaison });
+    if (b.appliRevision > 0) rows.push({ label: 'Révisions manquées',     icon: ICONS.revision, missed: b.missedRevision, total: b.appliRevision });
+    if (b.appliClosing > 0)  rows.push({ label: 'Clôtures manquées',      icon: ICONS.closing,  missed: b.missedClosing,  total: b.appliClosing });
+    return '<div class="missed-title">Détail des manqués</div>' +
+      rows.map(r => {
+        const cls = r.missed === 0 ? ' zero' : '';
+        return '<div class="missed-row' + cls + '">' +
+          '<span><span class="icon">' + r.icon + '</span>' + r.label + '</span>' +
+          '<span>' + r.missed + ' / ' + r.total + '</span>' +
+        '</div>';
+      }).join('');
+  }
+
+  function updateStats() {
+    let memoDone = 0, total = 0;
+    for (let d = 1; d <= TOTAL_DAYS; d++) {
+      if (isDayComplete(d)) { total++; if (d <= TOTAL_MEMO) memoDone++; }
+    }
+    const pct = Math.round((total / TOTAL_DAYS) * 100);
+    document.getElementById('stats-pct').textContent = pct + '%';
+    document.getElementById('stats-days-text').textContent = total + ' / ' + TOTAL_DAYS;
+    document.getElementById('stats-pages').textContent = calculatePagesMemorized();
+    document.getElementById('stats-tours').textContent = Math.max(0, Math.floor((memoDone - 32) / 6));
+    document.getElementById('stats-streak').textContent = calculateStreak();
+    document.getElementById('stats-circle').style.strokeDashoffset = 2 * Math.PI * 52 * (1 - pct / 100);
+
+    // Nouvelles sections
+    document.getElementById('task-stats').innerHTML = renderTaskBars(calcTaskStats());
+    const b = calcDayBreakdown();
+    document.getElementById('bilan-range').textContent = '1 → ' + b.total;
+    document.getElementById('day-breakdown').innerHTML = renderBreakdown(b);
+    document.getElementById('missed-stats').innerHTML = renderMissed(b);
+  }
+  function renderJuzGrid() {
+    const grid = document.getElementById('juz-grid');
+    let html = '', juzDone = 0;
+    for (let juz = 1; juz <= 30; juz++) {
+      const jd = programData.filter(d => !d.isClosing && d.juz === juz);
+      const total = jd.length;
+      const done = jd.filter(d => isDayComplete(d.day)).length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      if (pct >= 100) juzDone++;
+      let bg = 'background: rgba(14,66,49,0.05); color: rgba(14,66,49,0.5);';
+      if (pct >= 100) bg = 'background: linear-gradient(135deg, #308A60, #15573B); color: white;';
+      else if (pct >= 50) bg = 'background: rgba(48,138,96,0.18); color: #15573B;';
+      else if (pct > 0) bg = 'background: rgba(212,165,116,0.2); color: #946930;';
+      html += '<div style="padding: 6px 4px; text-align: center; border-radius: 8px; ' + bg + '"><div class="tabular" style="font-size: 11px; font-weight: 800;">' + juz + '</div><div class="tabular" style="font-size: 9px; font-weight: 700; opacity: 0.85;">' + pct + '%</div></div>';
+    }
+    grid.innerHTML = html;
+    const sum = document.getElementById('juz-summary');
+    if (sum) sum.textContent = juzDone + ' / 30';
+  }
+
+  // ============================================================
+  // EXPORT / IMPORT / RESET
+  // ============================================================
+  function exportData() {
+    const data = { version: 3, exportDate: new Date().toISOString(), currentDay, strict: strictMode, startDate: localStorage.getItem('tikrar:startDate'), progress };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tikrar-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Exporté');
+  }
+  function importData(event) {
+    const f = event.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.progress) progress = data.progress;
+        if (data.currentDay) currentDay = data.currentDay;
+        if (data.startDate) localStorage.setItem('tikrar:startDate', data.startDate);
+        if (typeof data.strict === 'boolean') {
+          strictMode = data.strict;
+          localStorage.setItem('tikrar:strict', strictMode ? '1' : '0');
+        }
+        saveState();
+        renderAll();
+        setupScrollObserver();
+        setTimeout(() => scrollToDay(currentDay, false), 50);
+        updateHeader();
+        showToast('Importé');
+      } catch (err) { showToast('Fichier invalide'); }
+    };
+    reader.readAsText(f);
+    event.target.value = '';
+  }
+  function resetAll() {
+    if (confirm('Supprimer TOUTES les données ?') && confirm('Vraiment ?')) {
+      ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded'].forEach(k => localStorage.removeItem(k));
+      currentDay = 1; progress = {}; strictMode = false;
+      document.getElementById('switch-strict').classList.remove('on');
+      renderAll();
+      setupScrollObserver();
+      closeModal('modal-settings');
+      updateHeader();
+      showToast('Réinitialisé');
+      setTimeout(maybeShowOnboarding, 300);
+    }
+  }
+
+  // ============================================================
+  // EFFECTS
+  // ============================================================
+  function showConfetti() {
+    const colors = ['#308A60', '#52A57A', '#D4A574', '#B98947', '#F1DA99'];
+    for (let i = 0; i < 28; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-12px';
+      el.style.width = (5 + Math.random() * 6) + 'px';
+      el.style.height = (5 + Math.random() * 6) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      document.body.appendChild(el);
+      const dur = 1400 + Math.random() * 1100;
+      const drift = (Math.random() - 0.5) * 240;
+      el.animate([
+        { transform: 'translate(0,0) rotate(0)', opacity: 1 },
+        { transform: 'translate(' + drift + 'px,' + (window.innerHeight + 30) + 'px) rotate(' + (Math.random() * 720) + 'deg)', opacity: 0 }
+      ], { duration: dur, easing: 'cubic-bezier(.25,.46,.45,.94)' }).onfinish = () => el.remove();
+    }
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ============================================================
+  // FALLBACK (file://)
+  // ============================================================
+  function generateProgramFallback() {
+    const SURAH = [[1,"Al-Fatihah"],[2,"Al-Baqarah"],[50,"Aal-Imran"],[77,"An-Nisa"],[106,"Al-Ma'idah"],[128,"Al-An'am"],[151,"Al-A'raf"],[177,"Al-Anfal"],[187,"At-Tawbah"],[208,"Yunus"],[221,"Hud"],[235,"Yusuf"],[249,"Ar-Ra'd"],[255,"Ibrahim"],[262,"Al-Hijr"],[267,"An-Nahl"],[282,"Al-Isra"],[293,"Al-Kahf"],[305,"Maryam"],[312,"Ta-Ha"],[322,"Al-Anbiya"],[332,"Al-Hajj"],[342,"Al-Mu'minun"],[350,"An-Nur"],[359,"Al-Furqan"],[367,"Ash-Shu'ara"],[377,"An-Naml"],[385,"Al-Qasas"],[396,"Al-Ankabut"],[404,"Ar-Rum"],[411,"Luqman"],[415,"As-Sajdah"],[418,"Al-Ahzab"],[428,"Saba"],[434,"Fatir"],[440,"Ya-Sin"],[446,"As-Saffat"],[453,"Sad"],[458,"Az-Zumar"],[467,"Ghafir"],[477,"Fussilat"],[483,"Ash-Shura"],[489,"Az-Zukhruf"],[496,"Ad-Dukhan"],[499,"Al-Jathiyah"],[502,"Al-Ahqaf"],[507,"Muhammad"],[511,"Al-Fath"],[515,"Al-Hujurat"],[518,"Qaf"],[520,"Adh-Dhariyat"],[523,"At-Tur"],[526,"An-Najm"],[528,"Al-Qamar"],[531,"Ar-Rahman"],[534,"Al-Waqi'ah"],[537,"Al-Hadid"],[542,"Al-Mujadilah"],[545,"Al-Hashr"],[549,"Al-Mumtahanah"],[551,"As-Saff"],[553,"Al-Jumu'ah"],[554,"Al-Munafiqun"],[556,"At-Taghabun"],[558,"At-Talaq"],[560,"At-Tahrim"],[562,"Al-Mulk"],[564,"Al-Qalam"],[566,"Al-Haqqah"],[568,"Al-Ma'arij"],[570,"Nuh"],[572,"Al-Jinn"],[574,"Al-Muzzammil"],[575,"Al-Muddaththir"],[577,"Al-Qiyamah"],[578,"Al-Insan"],[580,"Al-Mursalat"],[582,"An-Naba"],[583,"An-Nazi'at"],[585,"Abasa"],[586,"At-Takwir"],[587,"Al-Infitar"],[587,"Al-Mutaffifin"],[589,"Al-Inshiqaq"],[590,"Al-Buruj"],[591,"At-Tariq"],[591,"Al-A'la"],[592,"Al-Ghashiyah"],[593,"Al-Fajr"],[594,"Al-Balad"],[595,"Ash-Shams"],[595,"Al-Layl"],[596,"Ad-Duha"],[596,"Ash-Sharh"],[597,"At-Tin"],[597,"Al-Alaq"],[598,"Al-Qadr"],[598,"Al-Bayyinah"],[599,"Az-Zalzalah"],[599,"Al-Adiyat"],[600,"Al-Qari'ah"],[600,"At-Takathur"],[601,"Al-Asr"],[601,"Al-Humazah"],[601,"Al-Fil"],[602,"Quraysh"],[602,"Al-Ma'un"],[602,"Al-Kawthar"],[603,"Al-Kafirun"],[603,"An-Nasr"],[603,"Al-Masad"],[604,"Al-Ikhlas"],[604,"Al-Falaq"],[604,"An-Nas"]];
+    const MED = new Set(["Al-Baqarah","Aal-Imran","An-Nisa","Al-Ma'idah","Al-Anfal","At-Tawbah","Al-Hajj","An-Nur","Al-Ahzab","Muhammad","Al-Fath","Al-Hujurat","Ar-Rahman","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Insan","Al-Bayyinah","Az-Zalzalah","An-Nasr"]);
+    const JUZ = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
+    const gs = p => { let s = SURAH[0][1]; for (const [sp,n] of SURAH) { if (sp <= p) s = n; else break; } return s; };
+    const gj = p => { let j = 1; for (let i = 0; i < JUZ.length; i++) { if (JUZ[i] <= p) j = i + 1; else break; } return j; };
+    const gt = d => d === 1 ? {p:1,h:null} : d === 2 ? {p:2,h:null} : {p:Math.floor((d-1)/2)+2, h:d%2===1?'m1':'m2'};
+    const out = [];
+    for (let day = 1; day <= 1386; day++) {
+      if (day > 1206) {
+        const ci = day - 1206, ct = Math.floor((ci-1)/6)+1, k = ((ci-1)%6)+1, per = 1206/6;
+        out.push({day, isClosing:true, closingTour:ct, closingDay:k, totalClosingTours:30, revisionStartDay:Math.floor((k-1)*per)+1, revisionEndDay:Math.floor(k*per)});
+        continue;
+      }
+      const t = gt(day), sou = gs(t.p);
+      const e = {day, isClosing:false, mushafPage:t.p, half:t.h, sourate:sou, revelation:MED.has(sou)?'medinan':'makkan', juz:gj(t.p)};
+      if (day >= 3) {
+        e.liaisonStartDay = day < 33 ? 1 : (6 * (Math.floor((day-33)/6)+1) + 1);
+        e.liaisonEndDay = day - 2;
+      } else { e.liaisonStartDay = 0; e.liaisonEndDay = 0; }
+      if (day >= 33) {
+        const T = Math.floor((day-33)/6)+1, k = ((day-33)%6)+1, ttr = Math.min(6*T, 1206), per = ttr/6;
+        e.tourNumber = T; e.tourDay = k;
+        e.revisionStartDay = Math.floor((k-1)*per)+1; e.revisionEndDay = Math.floor(k*per);
+      } else { e.tourNumber = 0; e.tourDay = 0; e.revisionStartDay = 0; e.revisionEndDay = 0; }
+      out.push(e);
+    }
+    return out;
+  }
+
+  // ============================================================
+  // LAUNCH
+  // ============================================================
+  init();
+  </script>
+</body>
+</html>

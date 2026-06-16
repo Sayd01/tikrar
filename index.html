@@ -567,6 +567,31 @@
     .surah-pct { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.6); font-variant-numeric: tabular-nums; text-align: right; }
     .surah-row.complete .surah-pct { color: #15573B; }
 
+    /* ===== Reminder banner (intra-app) ===== */
+    .reminder-banner {
+      max-width: 540px; margin: 8px auto 0;
+      padding: 11px 14px;
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.06));
+      border: 1px solid rgba(245,158,11,0.35);
+      border-radius: 12px;
+      display: none; align-items: center; gap: 10px;
+      font-size: 12px;
+      color: #92400E;
+    }
+    .reminder-banner.show { display: flex; animation: fadeIn 0.3s ease; }
+    .reminder-banner .ic { font-size: 16px; flex-shrink: 0; }
+    .reminder-banner .txt { flex: 1; font-weight: 600; line-height: 1.35; }
+    .reminder-banner .txt strong { font-weight: 800; }
+    .reminder-banner .dismiss {
+      background: transparent; border: none;
+      color: #92400E; font-size: 18px;
+      cursor: pointer; padding: 0 4px;
+      opacity: 0.6;
+    }
+    .reminder-banner .dismiss:hover { opacity: 1; }
+    body.eve .reminder-banner { background: rgba(245,158,11,0.12); color: #FCD34D; border-color: rgba(252,211,77,0.35); }
+    body.eve .reminder-banner .dismiss { color: #FCD34D; }
+
     /* ===== CARNET : recherche ===== */
     .carnet-search {
       margin: 0 18px 12px;
@@ -861,6 +886,12 @@
   </header>
 
   <!-- ============ MAIN : TODAY ONLY ============ -->
+  <div id="reminder-banner" class="reminder-banner">
+    <span class="ic">⏰</span>
+    <span class="txt" id="reminder-text"></span>
+    <button class="dismiss" onclick="dismissReminder()" aria-label="Fermer">✕</button>
+  </div>
+
   <main class="today-wrap">
     <div class="today-hero">
       <div class="today-daynum" id="today-daynum">Jour 1 / 1988</div>
@@ -1076,6 +1107,15 @@
         </button>
       </div>
 
+      <div class="modal-card" id="notif-card">
+        <div class="field-label" style="margin-bottom: 6px;">Rappels quotidiens</div>
+        <p style="font-size: 11px; color: rgba(14,66,49,0.6); margin-bottom: 10px;">Active les notifications du navigateur pour recevoir un rappel quotidien.</p>
+        <button class="btn-secondary" onclick="enableNotifications()" id="notif-btn" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span id="notif-btn-text">Activer les rappels</span>
+        </button>
+      </div>
+
       <div class="modal-card">
         <div class="field-label" style="margin-bottom: 8px;">Sauvegarde</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1194,9 +1234,83 @@
     updateHeader();
     maybeShowOnboarding();
     maybeShowBackupReminder();
+    maybeShowDailyReminder();
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
+  }
+
+  // ============================================================
+  // RAPPEL INTELLIGENT À L'OUVERTURE
+  // ============================================================
+  // Si l'utilisateur a au moins 1 jour validé mais rien depuis 24h+,
+  // afficher un banner discret dans l'app
+  function maybeShowDailyReminder() {
+    if (Object.keys(progress).length === 0) return;
+    if (sessionStorage.getItem('tikrar:reminderDismissed')) return;
+    const lastVal = parseInt(localStorage.getItem('tikrar:lastValidation') || '0');
+    if (!lastVal) return;
+    const hours = Math.floor((Date.now() - lastVal) / 3600000);
+    if (hours < 24) return;
+    const days = Math.floor(hours / 24);
+    const banner = document.getElementById('reminder-banner');
+    const txt = document.getElementById('reminder-text');
+    if (days >= 1) {
+      txt.innerHTML = 'Cela fait <strong>' + days + (days > 1 ? ' jours' : ' jour') + '</strong> sans validation — continue ton wird.';
+    } else {
+      txt.innerHTML = 'Cela fait <strong>' + hours + 'h</strong> sans validation.';
+    }
+    banner.classList.add('show');
+    // Envoyer aussi une notification système si autorisée
+    sendSystemNotification(days);
+  }
+  function dismissReminder() {
+    sessionStorage.setItem('tikrar:reminderDismissed', '1');
+    document.getElementById('reminder-banner').classList.remove('show');
+  }
+
+  // ============================================================
+  // NOTIFICATIONS SYSTÈME
+  // ============================================================
+  function enableNotifications() {
+    if (!('Notification' in window)) {
+      showToast('Ton navigateur ne supporte pas les notifications');
+      return;
+    }
+    Notification.requestPermission().then(perm => {
+      updateNotifButton();
+      if (perm === 'granted') {
+        showToast('Rappels activés ✓');
+        new Notification('Tikrar', {
+          body: 'Les rappels sont activés. Bismillah ✦',
+          icon: './icons/icon-192.png',
+          badge: './icons/icon-192.png',
+          tag: 'tikrar-test'
+        });
+      } else if (perm === 'denied') {
+        showToast('Permission refusée');
+      }
+    });
+  }
+  function updateNotifButton() {
+    const btn = document.getElementById('notif-btn');
+    const txt = document.getElementById('notif-btn-text');
+    if (!btn || !txt) return;
+    if (!('Notification' in window)) { txt.textContent = 'Non supporté'; btn.disabled = true; return; }
+    if (Notification.permission === 'granted') { txt.textContent = 'Rappels activés ✓'; btn.disabled = true; }
+    else if (Notification.permission === 'denied') { txt.textContent = 'Bloqués — change dans les réglages du navigateur'; btn.disabled = true; }
+    else { txt.textContent = 'Activer les rappels'; btn.disabled = false; }
+  }
+  function sendSystemNotification(days) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    // Évite de spammer : 1 fois par session
+    if (sessionStorage.getItem('tikrar:notifSent')) return;
+    sessionStorage.setItem('tikrar:notifSent', '1');
+    new Notification('Tikrar — rappel', {
+      body: 'Cela fait ' + (days >= 1 ? days + ' jour' + (days > 1 ? 's' : '') : 'plus de 24h') + ' sans validation. Continue ton wird.',
+      icon: './icons/icon-192.png',
+      tag: 'tikrar-daily'
+    });
   }
 
   // ============================================================
@@ -1749,6 +1863,7 @@
     if (!progress[day]) progress[day] = {};
     const wasOn = progress[day][taskId] === true;
     progress[day][taskId] = !wasOn;
+    if (!wasOn) localStorage.setItem('tikrar:lastValidation', String(Date.now()));
     saveState();
 
     // MAJ today (visuelle ciblée)
@@ -1944,6 +2059,7 @@
     document.getElementById('set-current-day').value = currentDay;
     document.getElementById('switch-strict').classList.toggle('on', strictMode);
     updateSettingsErrorsBadge();
+    updateNotifButton();
     document.getElementById('modal-settings').classList.add('open');
   }
   function closeModal(id) {
@@ -2319,12 +2435,31 @@
   // ============================================================
   // EXPORT / IMPORT / RESET
   // ============================================================
-  function exportData() {
+  async function exportData() {
     const data = { version: 4, exportDate: new Date().toISOString(), currentDay, strict: strictMode, startDate: localStorage.getItem('tikrar:startDate'), progress, errors };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const filename = 'tikrar-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+
+    // Web Share API : partage natif (Drive, WhatsApp, mail…) si supporté + fichier partageable
+    if (navigator.share && navigator.canShare) {
+      try {
+        const file = new File([blob], filename, { type: 'application/json' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Sauvegarde Tikrar', text: 'Sauvegarde du ' + new Date().toLocaleDateString('fr-FR') });
+          localStorage.setItem('tikrar:lastBackup', String(Date.now()));
+          showToast('Partagé ✓');
+          return;
+        }
+      } catch (e) {
+        if (e.name === 'AbortError') return; // user cancelled
+      }
+    }
+
+    // Fallback : téléchargement classique
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'tikrar-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.href = url; a.download = filename;
     a.click(); URL.revokeObjectURL(url);
     localStorage.setItem('tikrar:lastBackup', String(Date.now()));
     showToast('Exporté ✓');
@@ -2356,7 +2491,7 @@
   }
   function resetAll() {
     if (confirm('Supprimer TOUTES les données ?') && confirm('Vraiment ?')) {
-      ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded','tikrar:errors','tikrar:lastBackup','tikrar:firstUse'].forEach(k => localStorage.removeItem(k));
+      ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded','tikrar:errors','tikrar:lastBackup','tikrar:firstUse','tikrar:lastValidation'].forEach(k => localStorage.removeItem(k));
       currentDay = 1; progress = {}; strictMode = false; errors = {};
       document.getElementById('switch-strict').classList.remove('on');
       renderToday();

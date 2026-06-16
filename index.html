@@ -1668,15 +1668,22 @@
     saveState();
   }
 
-  // Met à jour la ligne quick-stats du hero (pages + juz mémorisés)
+  // Met à jour la ligne quick-stats du hero (position actuelle dans le Coran)
   function updateQuickStats() {
     const el = document.getElementById('today-quickstats');
     if (!el) return;
-    _pageDays = null; // invalide le cache au cas où programData a changé
-    const pgs = calculatePagesMemorized();
-    const jz = calculateJuzMemorized();
+    const d = programData[currentDay - 1];
+    if (!d || d.isClosing) {
+      // Phase clôture : afficher progression de la clôture
+      if (d && d.isClosing) {
+        el.innerHTML = 'Clôture <strong>' + d.closingTour + '</strong>/30';
+      } else {
+        el.innerHTML = '';
+      }
+      return;
+    }
     el.innerHTML =
-      '<strong>' + pgs + '</strong>/604 pages<span class="sep">·</span><strong>' + jz + '</strong>/30 juz';
+      'Page <strong>' + d.mushafPage + '</strong>/604<span class="sep">·</span>Juz <strong>' + d.juz + '</strong>/30';
   }
 
   function updateHeader() {

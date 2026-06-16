@@ -984,6 +984,16 @@
     const a = formatTask(s), b = formatTask(e);
     return a === b ? a : a + '→' + b;
   }
+  // Plage de pages sans tier (« Pages 4 → 12 »)
+  function formatPageRange(s, e) {
+    if (!s || !e) return '—';
+    const sD = programData[s - 1], eD = programData[e - 1];
+    if (!sD || !eD) return '—';
+    if (sD.isClosing || eD.isClosing) return String(s) + ' → ' + String(e);
+    const sP = sD.mushafPage, eP = eD.mushafPage;
+    if (sP === eP) return 'Page ' + sP;
+    return 'Pages ' + sP + ' → ' + eP;
+  }
 
   // ============================================================
   // VERSETS — calcul du range de versets par tiers
@@ -1084,27 +1094,29 @@
       icon: ICONS.memo
     });
 
-    // ===== Liaison : pages + versets =====
+    // ===== Liaison : versets en principal, pages en sous-info =====
     if ((d.liaisonEndDay || 0) >= 1) {
       const liaisonText = fmtRangeText(getRangeVerses(d.liaisonStartDay, d.liaisonEndDay));
+      const pageStr = formatPageRange(d.liaisonStartDay, d.liaisonEndDay);
       t.push({
         id: 'liaison',
         label: 'Liaison (Rabt)',
-        content: 'Pages ' + formatRange(d.liaisonStartDay, d.liaisonEndDay),
-        extra: liaisonText || 'Réciter sans regarder',
+        content: liaisonText || pageStr,
+        extra: liaisonText ? pageStr + ' · sans regarder' : 'sans regarder',
         icon: ICONS.liaison
       });
     }
 
-    // ===== Révision : pages + tour + versets =====
+    // ===== Révision : versets en principal, tour + pages en sous-info =====
     if ((d.tourNumber || 0) >= 1) {
       const revText = fmtRangeText(getRangeVerses(d.revisionStartDay, d.revisionEndDay));
+      const pageStr = formatPageRange(d.revisionStartDay, d.revisionEndDay);
       const tourInfo = 'Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6';
       t.push({
         id: 'revision',
         label: 'Révision (Murajaa)',
-        content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
-        extra: revText ? tourInfo + ' · ' + revText : tourInfo,
+        content: revText || pageStr,
+        extra: revText ? tourInfo + ' · ' + pageStr : tourInfo,
         icon: ICONS.revision
       });
     }

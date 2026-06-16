@@ -222,6 +222,25 @@
     .switch .knob { position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform .25s cubic-bezier(.16,1,.3,1); }
     .switch.on .knob { transform: translateX(18px); }
 
+    /* Versets composant un tiers */
+    .task-verses {
+      margin: 10px 0 4px 44px;
+      padding: 9px 12px;
+      background: rgba(212,165,116,0.10);
+      border-left: 2.5px solid rgba(212,165,116,0.55);
+      border-radius: 7px;
+      font-size: 13px; font-weight: 600;
+      color: rgba(14,66,49,0.88);
+      letter-spacing: -0.005em;
+    }
+    .task-verses .vlabel {
+      font-size: 9px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: #946930; display: block; margin-bottom: 3px;
+    }
+    .task-verses .vmuted { color: rgba(14,66,49,0.5); font-weight: 500; }
+    .task-verses strong { color: #15573B; font-weight: 800; }
+
     .notes {
       margin-top: 8px; width: 100%;
       background: #FAF6EC;
@@ -552,10 +571,14 @@
     closing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>'
   };
 
+  // Noms des 114 sourates (index = numéro - 1)
+  const SURAH_NAMES = ["Al-Fatihah","Al-Baqarah","Aal-Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at","Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-Adiyat","Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"];
+
   // ============================================================
   // STATE
   // ============================================================
   let programData = [];
+  let quranPages = {};         // { "1": [{s,f,t}], ... } — versets par page
   let currentDay = 1;
   let progress = {};
   let strictMode = false;
@@ -570,6 +593,12 @@
       programData = await r.json();
     } catch (e) {
       programData = generateProgramFallback();
+    }
+    try {
+      const r2 = await fetch('./data/quran-pages.json');
+      quranPages = await r2.json();
+    } catch (e) {
+      quranPages = {};   // si non disponible (file://), on n'affichera pas les versets
     }
     loadState();
     renderAll();
@@ -622,6 +651,77 @@
   }
 
   // ============================================================
+  // VERSETS — calcul du range de versets par tiers
+  // ============================================================
+  // Versets composant un tiers (ou la page entière si part === null)
+  // Retourne un array [{s, f, t}] (regroupé par sourate)
+  function getVersesForTask(page, part) {
+    const chunks = quranPages[String(page)];
+    if (!chunks || !chunks.length) return null;
+    if (!part) return chunks.map(c => ({...c}));   // page entière (jours 1-2)
+
+    // Aplatir tous les versets de la page
+    const verses = [];
+    chunks.forEach(c => { for (let a = c.f; a <= c.t; a++) verses.push({s: c.s, a}); });
+    const N = verses.length;
+    if (!N) return null;
+
+    // Distribuer en 3 tiers le plus équilibré possible
+    // reste 0 : [b,b,b] · reste 1 : 1 verset en plus au milieu · reste 2 : aux bords
+    const base = Math.floor(N / 3), rem = N % 3;
+    const sizes = rem === 0 ? [base, base, base]
+                : rem === 1 ? [base, base + 1, base]
+                            : [base + 1, base, base + 1];
+
+    const idx = part === 't1' ? 0 : part === 't2' ? 1 : 2;
+    let start = 0; for (let i = 0; i < idx; i++) start += sizes[i];
+    const slice = verses.slice(start, start + sizes[idx]);
+
+    // Regrouper par sourate
+    const out = [];
+    slice.forEach(v => {
+      const last = out[out.length - 1];
+      if (last && last.s === v.s && last.t + 1 === v.a) last.t = v.a;
+      else out.push({s: v.s, f: v.a, t: v.a});
+    });
+    return out;
+  }
+
+  // Range de versets d'une plage de jours (liaison / révision)
+  function getRangeVerses(fromDay, toDay) {
+    if (!fromDay || !toDay) return null;
+    const fD = programData[fromDay - 1], tD = programData[toDay - 1];
+    if (!fD || !tD || fD.isClosing || tD.isClosing) return null;
+    const fV = getVersesForTask(fD.mushafPage, fD.part);
+    const tV = getVersesForTask(tD.mushafPage, tD.part);
+    if (!fV || !fV.length || !tV || !tV.length) return null;
+    return { fromS: fV[0].s, fromA: fV[0].f, toS: tV[tV.length - 1].s, toA: tV[tV.length - 1].t };
+  }
+
+  // Formatage HTML d'un array de chunks (versets précis du tiers)
+  function fmtChunks(chunks) {
+    if (!chunks || !chunks.length) return '';
+    if (chunks.length === 1) {
+      const c = chunks[0], n = c.t - c.f + 1;
+      const range = c.f === c.t ? ('verset ' + c.f) : ('versets ' + c.f + ' → ' + c.t);
+      return '<strong>' + SURAH_NAMES[c.s - 1] + '</strong> ' + range + ' <span class="vmuted">(' + n + ')</span>';
+    }
+    return chunks.map(c => {
+      const range = c.f === c.t ? c.f : c.f + '-' + c.t;
+      return '<strong>' + SURAH_NAMES[c.s - 1] + '</strong> ' + range;
+    }).join(' · ');
+  }
+
+  // Formatage HTML d'un range (liaison/révision)
+  function fmtRange(r) {
+    if (!r) return '';
+    if (r.fromS === r.toS) {
+      return '<strong>' + SURAH_NAMES[r.fromS - 1] + '</strong> ' + r.fromA + ' → ' + r.toA;
+    }
+    return '<strong>' + SURAH_NAMES[r.fromS - 1] + '</strong> ' + r.fromA + ' → <strong>' + SURAH_NAMES[r.toS - 1] + '</strong> ' + r.toA;
+  }
+
+  // ============================================================
   // TASKS LOGIC
   // ============================================================
   function getApplicableTasks(d) {
@@ -641,7 +741,8 @@
       label: 'Mémorisation',
       content: 'Page ' + d.mushafPage + (d.part ? ' ' + d.part : ''),
       extra: d.sourate + ' · ' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + ' · Juz ' + d.juz,
-      icon: ICONS.memo
+      icon: ICONS.memo,
+      verses: fmtChunks(getVersesForTask(d.mushafPage, d.part))
     });
     if ((d.liaisonEndDay || 0) >= 1) {
       t.push({
@@ -649,7 +750,8 @@
         label: 'Liaison (Rabt)',
         content: 'Pages ' + formatRange(d.liaisonStartDay, d.liaisonEndDay),
         extra: 'Réciter sans regarder le Coran',
-        icon: ICONS.liaison
+        icon: ICONS.liaison,
+        verses: fmtRange(getRangeVerses(d.liaisonStartDay, d.liaisonEndDay))
       });
     }
     if ((d.tourNumber || 0) >= 1) {
@@ -658,7 +760,8 @@
         label: 'Révision (Murajaa)',
         content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
         extra: 'Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6 · sans regarder',
-        icon: ICONS.revision
+        icon: ICONS.revision,
+        verses: fmtRange(getRangeVerses(d.revisionStartDay, d.revisionEndDay))
       });
     }
     return t;
@@ -781,6 +884,9 @@
           '</div>' +
           '<div class="switch' + (isDone ? ' on' : '') + '"><div class="knob"></div></div>' +
         '</div>';
+      if (t.verses) {
+        tasksHtml += '<div class="task-verses"><span class="vlabel">Versets à travailler</span>' + t.verses + '</div>';
+      }
     });
     tasksHtml += '</div>';
 

@@ -355,6 +355,29 @@
     .today-pills .pill.juz { background: rgba(48,138,96,0.08); color: #15573B; border: 1px solid rgba(48,138,96,0.18); }
     .today-pills .pill.closing { background: #F8ECCC; color: #946930; }
 
+    /* Indicateur de position dans la page (● ● ○) */
+    .part-dots {
+      display: inline-flex; gap: 5px; vertical-align: middle;
+      margin-left: 12px;
+    }
+    .part-dots.sm { gap: 3px; margin-left: 5px; }
+    .part-dots.xs { gap: 2px; margin-left: 4px; }
+    .part-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: transparent;
+      border: 1.5px solid rgba(185, 137, 71, 0.5);
+      transition: all .3s;
+    }
+    .part-dots.sm .part-dot { width: 6px; height: 6px; border-width: 1.4px; }
+    .part-dots.xs .part-dot { width: 5px; height: 5px; border-width: 1.2px; }
+    .part-dot.active {
+      background: #B98947;
+      border-color: #B98947;
+      box-shadow: 0 0 0 2px rgba(185, 137, 71, 0.12);
+    }
+    body.eve .part-dot { border-color: rgba(230, 195, 106, 0.5); }
+    body.eve .part-dot.active { background: #E6C36A; border-color: #E6C36A; box-shadow: 0 0 0 2px rgba(230, 195, 106, 0.15); }
+
     /* Streak header pill */
     .streak-pill {
       display: inline-flex; align-items: center; gap: 4px;
@@ -940,6 +963,16 @@
   // ============================================================
   // FORMAT helpers
   // ============================================================
+  // Indicateur visuel ● ● ○ pour t1 / t2 / t3
+  function partDots(part, size) {
+    if (!part) return '';
+    const idx = part === 't1' ? 0 : part === 't2' ? 1 : 2;
+    const cls = 'part-dots' + (size ? ' ' + size : '');
+    let html = '<span class="' + cls + '">';
+    for (let i = 0; i < 3; i++) html += '<span class="part-dot' + (i === idx ? ' active' : '') + '"></span>';
+    return html + '</span>';
+  }
+
   function formatTask(day) {
     const d = programData[day - 1];
     if (!d || d.isClosing) return String(day);
@@ -1116,7 +1149,7 @@
         '<span class="pill closing">Clôture ' + d.closingTour + ' / 30</span>' +
         '<span class="pill closing">Jour ' + d.closingDay + ' / 6</span>';
     } else {
-      pageEl.innerHTML = 'Page ' + d.mushafPage + (d.part ? '<span class="part">' + d.part + '</span>' : '');
+      pageEl.innerHTML = 'Page ' + d.mushafPage + partDots(d.part);
       sourateEl.textContent = d.sourate;
       sourateEl.className = 'today-sourate ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan');
       pillsEl.innerHTML =
@@ -1194,7 +1227,7 @@
       sourateHtml = 'Clôture';
       sourateCls = 'closing';
     } else {
-      pageHtml = d.mushafPage + (d.part ? '<span class="h">' + d.part + '</span>' : '');
+      pageHtml = d.mushafPage + partDots(d.part, 'xs');
       sourateHtml = d.sourate;
       sourateCls = d.revelation;
     }
@@ -1248,7 +1281,7 @@
         '<div class="ex-head"><span class="ex-day-label">Jour ' + day + ' / ' + TOTAL_DAYS + '</span>' +
           (d.tourNumber > 0 ? '<span class="ex-day-badge">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '') +
         '</div>' +
-        '<div class="ex-title">Page ' + d.mushafPage + (d.part ? '<span class="part">' + d.part + '</span>' : '') +
+        '<div class="ex-title">Page ' + d.mushafPage + partDots(d.part, 'sm') +
           '<span class="sep">·</span><span class="' + revelationCls + '">' + d.sourate + '</span>' +
         '</div>' +
         '<div class="ex-pills">' +

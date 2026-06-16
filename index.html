@@ -618,6 +618,37 @@
     body.eve .surah-verses { color: rgba(255,255,255,0.55); }
     body.eve .surah-verses .rem { color: #FCD34D; }
 
+    /* ===== Heatmap 365 jours ===== */
+    .heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .heatmap {
+      display: grid;
+      grid-template-rows: repeat(7, 1fr);
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 2px;
+      min-width: 100%;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      background: rgba(14, 66, 49, 0.07);
+      min-width: 7px;
+      cursor: pointer;
+      transition: transform .12s;
+    }
+    .heatmap-cell:hover { transform: scale(1.4); border-radius: 1px; }
+    .heatmap-cell.done    { background: linear-gradient(135deg, #52A57A, #15573B); }
+    .heatmap-cell.partial { background: linear-gradient(135deg, #E6C36A, #B98947); }
+    .heatmap-cell.future  { background: rgba(14, 66, 49, 0.04); opacity: 0.5; cursor: default; }
+    .heatmap-cell.current { box-shadow: 0 0 0 1.5px #1E3A5F; z-index: 1; }
+    .heatmap-legend { display: flex; align-items: center; gap: 6px; font-size: 10px; color: rgba(14,66,49,0.5); font-weight: 600; margin-top: 8px; }
+    .heatmap-legend .hm-l { display: flex; align-items: center; gap: 4px; }
+    .heatmap-legend .hm-l span { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+    body.eve .heatmap-cell { background: rgba(255,255,255,0.07); }
+    body.eve .heatmap-cell.future { background: rgba(255,255,255,0.03); }
+    body.eve .heatmap-cell.current { box-shadow: 0 0 0 1.5px #7CC09B; }
+    body.eve .heatmap-legend { color: rgba(255,255,255,0.5); }
+
     /* ===== Reminder banner (intra-app) ===== */
     .reminder-banner {
       max-width: 540px; margin: 8px auto 0;
@@ -1049,6 +1080,22 @@
             <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 1988</span>
           </div>
         </div>
+        <div id="stats-eta" style="font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.72); margin-top: 16px; display: none;"></div>
+      </div>
+
+      <!-- ============ Heatmap 365 derniers jours ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 10px;">365 derniers jours <span id="hm-summary" style="float:right; color:rgba(14,66,49,0.6); text-transform:none; letter-spacing:0; font-variant-numeric:tabular-nums; font-weight:600;">0 j</span></div>
+        <div class="heatmap-wrap">
+          <div class="heatmap" id="heatmap"></div>
+        </div>
+        <div class="heatmap-legend">
+          <span>Moins</span>
+          <span class="hm-l"><span style="background:rgba(14,66,49,0.07)"></span></span>
+          <span class="hm-l"><span style="background:linear-gradient(135deg,#E6C36A,#B98947)"></span></span>
+          <span class="hm-l"><span style="background:linear-gradient(135deg,#52A57A,#15573B)"></span></span>
+          <span>Plus</span>
+        </div>
       </div>
 
       <!-- ============ PAR TÂCHE ============ -->
@@ -1155,6 +1202,15 @@
         <button class="btn-secondary" onclick="openErrors()" style="width:100%;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           Mes versets difficiles <span id="errors-count-settings" style="margin-left:6px;background:#B45309;color:white;padding:1px 8px;border-radius:999px;font-size:11px;">0</span>
+        </button>
+      </div>
+
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 6px;">Rattrapage rapide</div>
+        <p style="font-size: 11px; color: rgba(14,66,49,0.6); margin-bottom: 10px;" id="bulk-info">Marque tous les jours précédents comme validés en un clic (utile si tu as déjà fait du Tikrar avant d'installer l'app).</p>
+        <button class="btn-secondary" onclick="bulkValidatePrevious()" id="bulk-btn" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Valider les <span id="bulk-count">N</span> jours précédents
         </button>
       </div>
 
@@ -2114,6 +2170,8 @@
     renderJuzGrid();
     renderWeeklyStats();
     renderSurahList('');
+    renderHeatmap();
+    renderETA();
     document.getElementById('surah-search').value = '';
     document.getElementById('modal-stats').classList.add('open');
   }
@@ -2122,6 +2180,21 @@
     document.getElementById('switch-strict').classList.toggle('on', strictMode);
     updateSettingsErrorsBadge();
     updateNotifButton();
+    // Bulk validate : afficher nombre de jours à rattraper
+    const prev = currentDay - 1;
+    const bulkBtn = document.getElementById('bulk-btn');
+    const bulkInfo = document.getElementById('bulk-info');
+    if (prev < 1) {
+      bulkBtn.disabled = true;
+      bulkBtn.style.opacity = 0.5;
+      document.getElementById('bulk-count').textContent = '0';
+      bulkInfo.textContent = 'Aucun jour précédent à rattraper (tu es au tout début).';
+    } else {
+      bulkBtn.disabled = false;
+      bulkBtn.style.opacity = 1;
+      document.getElementById('bulk-count').textContent = prev;
+      bulkInfo.textContent = 'Marque les ' + prev + ' jours précédents comme validés (utile si tu as déjà fait du Tikrar avant d\'installer l\'app).';
+    }
     document.getElementById('modal-settings').classList.add('open');
   }
   function closeModal(id) {
@@ -2481,6 +2554,78 @@
     } else {
       showToast('Pas de résultat pour « ' + val + ' »');
     }
+  }
+
+  // ===== A2 · Heatmap 365 derniers jours =====
+  function renderHeatmap() {
+    const grid = document.getElementById('heatmap');
+    const start = Math.max(1, currentDay - 364);
+    const end = start + 364;
+    let html = '', doneCount = 0;
+    for (let d = start; d <= end; d++) {
+      if (d > TOTAL_DAYS) { html += '<div class="heatmap-cell future"></div>'; continue; }
+      const complete = isDayComplete(d);
+      const partial = !complete && isDayPartial(d);
+      if (complete) doneCount++;
+      let cls = 'heatmap-cell';
+      if (complete) cls += ' done';
+      else if (partial) cls += ' partial';
+      if (d > currentDay) cls += ' future';
+      if (d === currentDay) cls += ' current';
+      html += '<div class="' + cls + '" title="Jour ' + d + '" onclick="setActiveDay(' + d + ');closeModal(\'modal-stats\');"></div>';
+    }
+    grid.innerHTML = html;
+    document.getElementById('hm-summary').textContent = doneCount + ' / 365 j validés';
+  }
+
+  // ===== A3 · Date de fin estimée =====
+  function calculateETA() {
+    const sd = localStorage.getItem('tikrar:startDate');
+    if (!sd) return null;
+    const start = new Date(sd + 'T00:00:00');
+    if (isNaN(start.getTime())) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const calDays = Math.floor((today.getTime() - start.getTime()) / 86400000);
+    if (calDays <= 0) return null;
+    let completed = 0;
+    for (let d = 1; d <= TOTAL_DAYS; d++) if (isDayComplete(d)) completed++;
+    if (completed === 0) return null;
+    const rate = completed / calDays;
+    if (rate <= 0) return null;
+    const remaining = TOTAL_DAYS - completed;
+    const daysToFinish = Math.ceil(remaining / rate);
+    return new Date(today.getTime() + daysToFinish * 86400000);
+  }
+  function renderETA() {
+    const el = document.getElementById('stats-eta');
+    const d = calculateETA();
+    if (!d) { el.style.display = 'none'; return; }
+    el.style.display = '';
+    el.textContent = 'Fin estimée : ' + d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  // ===== A1 · Bulk validate des jours précédents =====
+  function bulkValidatePrevious() {
+    const target = currentDay - 1;
+    if (target < 1) { showToast('Aucun jour précédent'); return; }
+    if (!confirm('Marquer les jours 1 à ' + target + ' comme entièrement validés ?\n\nCeci coche toutes les tâches applicables (mémo, liaison, révision) pour ces ' + target + ' jours.')) return;
+    let added = 0;
+    for (let day = 1; day <= target; day++) {
+      const d = programData[day - 1];
+      if (!d) continue;
+      const tasks = getApplicableTasks(d);
+      if (!progress[day]) progress[day] = {};
+      tasks.forEach(t => {
+        if (progress[day][t.id] !== true) { progress[day][t.id] = true; added++; }
+      });
+    }
+    localStorage.setItem('tikrar:lastValidation', String(Date.now()));
+    saveState();
+    renderToday();
+    updateHeader();
+    if (document.getElementById('row-1')) renderAll();
+    closeModal('modal-settings');
+    showToast(added + ' tâche' + (added > 1 ? 's' : '') + ' validée' + (added > 1 ? 's' : ''));
   }
 
   function renderJuzGrid() {

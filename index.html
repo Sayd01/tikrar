@@ -355,6 +355,35 @@
     .today-pills .pill.juz { background: rgba(48,138,96,0.08); color: #15573B; border: 1px solid rgba(48,138,96,0.18); }
     .today-pills .pill.closing { background: #F8ECCC; color: #946930; }
 
+    /* Milestone : Juz / Hizb / Rub commence dans cette portion */
+    .today-pills .pill.ms-juz {
+      background: linear-gradient(135deg, #F0BD52, #B98947);
+      color: white;
+      border: 1px solid #946930;
+      box-shadow: 0 2px 10px rgba(185,137,71,0.35);
+      font-weight: 800;
+      animation: glow 2.4s ease-in-out infinite;
+    }
+    .today-pills .pill.ms-hizb {
+      background: linear-gradient(135deg, #FAEDD0, #E6C36A);
+      color: #6F4E22;
+      border: 1px solid #D4A574;
+      font-weight: 800;
+    }
+    .today-pills .pill.ms-rub {
+      background: rgba(212,165,116,0.12);
+      color: #946930;
+      border: 1px dashed rgba(185,137,71,0.5);
+      font-weight: 700;
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 2px 10px rgba(185,137,71,0.3); }
+      50%      { box-shadow: 0 2px 18px rgba(185,137,71,0.55); }
+    }
+    body.eve .today-pills .pill.ms-juz { background: linear-gradient(135deg, #E6C36A, #946930); }
+    body.eve .today-pills .pill.ms-hizb { background: rgba(230,195,106,0.2); color: #F1DA99; border-color: rgba(230,195,106,0.5); }
+    body.eve .today-pills .pill.ms-rub { color: #E6C36A; background: rgba(230,195,106,0.08); }
+
     /* Indicateur de position dans la page (● ● ○) */
     .part-dots {
       display: inline-flex; gap: 5px; vertical-align: middle;
@@ -894,6 +923,7 @@
   // ============================================================
   let programData = [];
   let quranPages = {};         // { "1": [{s,f,t}], ... } — versets par page
+  let quranMilestones = {};    // { "2:142": {juz:2, hizb:3, rub:9, top:'juz'}, ... }
   let currentDay = 1;
   let progress = {};
   let strictMode = false;
@@ -913,6 +943,12 @@
       quranPages = await r2.json();
     } catch (e) {
       quranPages = {};
+    }
+    try {
+      const r3 = await fetch('./data/quran-milestones.json');
+      quranMilestones = await r3.json();
+    } catch (e) {
+      quranMilestones = {};
     }
     loadState();
     applyEveMode();
@@ -1066,6 +1102,23 @@
     return chunks.reduce((s, c) => s + (c.t - c.f + 1), 0);
   }
 
+  // Milestone (Juz / Hizb / Rub) commençant dans la liste de versets
+  // Retourne le plus prioritaire : juz > hizb > rub
+  function findTopMilestone(chunks) {
+    if (!chunks || !chunks.length) return null;
+    let best = null;
+    const rank = { juz: 3, hizb: 2, rub: 1 };
+    chunks.forEach(c => {
+      for (let a = c.f; a <= c.t; a++) {
+        const m = quranMilestones[c.s + ':' + a];
+        if (m && (!best || rank[m.top] > rank[best.top])) {
+          best = m;
+        }
+      }
+    });
+    return best;
+  }
+
   // ============================================================
   // TASKS LOGIC
   // ============================================================
@@ -1164,11 +1217,21 @@
       pageEl.innerHTML = 'Page ' + d.mushafPage + partDots(d.part);
       sourateEl.textContent = d.sourate;
       sourateEl.className = 'today-sourate ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan');
+      // Milestone éventuel (Juz/Hizb/Rub commençant dans le tiers)
+      let msHtml = '';
+      const memoVerses = getVersesForTask(d.mushafPage, d.part);
+      const ms = findTopMilestone(memoVerses);
+      if (ms) {
+        if (ms.top === 'juz')       msHtml = '<span class="pill ms-juz">✦ Début Juz ' + ms.juz + '</span>';
+        else if (ms.top === 'hizb') msHtml = '<span class="pill ms-hizb">◆ Début Hizb ' + ms.hizb + '</span>';
+        else                        msHtml = '<span class="pill ms-rub">· Rub ' + ms.rub + '</span>';
+      }
       pillsEl.innerHTML =
         '<span class="pill ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan') + '">' +
           (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + '</span>' +
         '<span class="pill juz">Juz ' + d.juz + '</span>' +
-        (d.tourNumber > 0 ? '<span class="pill juz">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '');
+        (d.tourNumber > 0 ? '<span class="pill juz">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '') +
+        msHtml;
     }
 
     // Cartes des tâches

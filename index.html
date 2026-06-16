@@ -419,6 +419,99 @@
     .streak-pill.zero { color: rgba(14,66,49,0.45); background: rgba(14,66,49,0.06); }
     .streak-pill .fire { font-size: 13px; }
 
+    /* Indicateur de retard calendaire */
+    .cal-pill {
+      display: none;
+      align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 999px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+    .cal-pill.show { display: inline-flex; }
+    .cal-pill.behind { background: rgba(245, 158, 11, 0.15); color: #B45309; }
+    .cal-pill.ahead  { background: rgba(48, 138, 96, 0.12); color: #15573B; }
+
+    /* Quick stats sous le daynum */
+    .today-quickstats {
+      font-size: 11px; font-weight: 600;
+      color: rgba(14,66,49,0.55);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+    .today-quickstats .sep { color: rgba(14,66,49,0.25); margin: 0 6px; }
+    body.eve .today-quickstats { color: rgba(255,255,255,0.5); }
+    body.eve .today-quickstats .sep { color: rgba(255,255,255,0.2); }
+
+    /* Bouton "marquer difficulté" */
+    .diff-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 12px;
+      padding: 11px 14px;
+      background: rgba(245, 158, 11, 0.07);
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      border-radius: 12px;
+      font-size: 12px; font-weight: 700;
+      color: #B45309;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s;
+    }
+    .diff-btn:hover { background: rgba(245, 158, 11, 0.12); }
+    .diff-btn .count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: #B45309; color: white;
+      border-radius: 999px; font-size: 10px; font-weight: 800;
+    }
+    body.eve .diff-btn { background: rgba(245, 158, 11, 0.1); color: #FCD34D; border-color: rgba(252, 211, 77, 0.4); }
+    body.eve .diff-btn:hover { background: rgba(245, 158, 11, 0.18); }
+
+    /* Modal : versets difficiles à marquer */
+    .verse-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; margin: 4px;
+      border-radius: 999px;
+      background: white;
+      border: 1.5px solid rgba(14,66,49,0.12);
+      font-size: 13px; font-weight: 600;
+      color: #1A1F2C;
+      cursor: pointer; font-family: inherit;
+      transition: all .2s;
+      font-variant-numeric: tabular-nums;
+    }
+    .verse-chip:hover { border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.05); }
+    .verse-chip.marked {
+      background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+      border-color: #F59E0B;
+      color: #92400E;
+      box-shadow: 0 2px 6px rgba(245,158,11,0.2);
+    }
+    .verse-chip.marked::before { content: '⚠ '; }
+
+    .err-list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px;
+      background: white;
+      border: 1px solid rgba(14,66,49,0.06);
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .err-list-item .verse { font-weight: 700; color: #92400E; font-variant-numeric: tabular-nums; }
+    .err-list-item .date { font-size: 11px; color: rgba(14,66,49,0.5); }
+    .err-list-item .rm {
+      background: none; border: none;
+      color: #B91C1C; cursor: pointer;
+      padding: 4px 8px; border-radius: 6px;
+      font-size: 16px;
+    }
+    .err-list-item .rm:hover { background: rgba(220,38,38,0.1); }
+    .err-empty {
+      text-align: center; padding: 22px 12px;
+      color: rgba(14,66,49,0.5); font-size: 12px; font-style: italic;
+    }
+
     /* Task cards (gros, tappables) */
     .today-tasks { margin-top: 18px; flex: 1; }
     .tcard {
@@ -674,6 +767,7 @@
         <span class="streak-pill" id="streak-pill" title="Série en cours">
           <span class="fire">🔥</span><span id="streak-num">0</span>
         </span>
+        <span class="cal-pill" id="cal-pill" title="Rythme calendaire"></span>
       </div>
       <div class="hdr-actions">
         <button class="hdr-btn" onclick="openCarnet()" aria-label="Carnet">
@@ -693,6 +787,7 @@
   <main class="today-wrap">
     <div class="today-hero">
       <div class="today-daynum" id="today-daynum">Jour 1 / 1988</div>
+      <div class="today-quickstats" id="today-quickstats">—</div>
       <div class="today-page" id="today-page">—</div>
       <div class="today-sourate" id="today-sourate">—</div>
       <div class="today-pills" id="today-pills"></div>
@@ -700,9 +795,15 @@
 
     <div class="today-tasks" id="today-tasks"></div>
 
+    <button class="diff-btn" onclick="openDiffPicker()" id="diff-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Marquer un verset difficile
+      <span class="count" id="diff-count" style="display:none;">0</span>
+    </button>
+
     <div class="today-notes">
       <div class="today-notes-label">Notes du jour</div>
-      <textarea id="today-notes-input" rows="1" placeholder="Erreurs récurrentes, versets difficiles…" onblur="saveTodayNotes(this.value)"></textarea>
+      <textarea id="today-notes-input" rows="1" placeholder="Observations, remarques…" onblur="saveTodayNotes(this.value)"></textarea>
     </div>
   </main>
 
@@ -733,6 +834,27 @@
         <div>M · L · R</div>
       </div>
       <div id="rows"></div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL : verse picker (marquer difficulté) ============ -->
+  <div id="modal-diff" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-diff')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">Versets difficiles</h2>
+      <p style="font-size: 12px; color: rgba(14,66,49,0.65); margin-bottom: 14px;">Tape un verset pour le marquer · re-tape pour retirer.</p>
+      <div id="diff-chips" style="margin-bottom: 8px;"></div>
+      <button class="btn-primary" onclick="closeModal('modal-diff')" style="width:100%; margin-top: 14px;">Terminé</button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL : liste de tous les versets difficiles (depuis Settings) ============ -->
+  <div id="modal-errors" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-errors')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">Mes versets difficiles <span id="errors-count" style="color:#B45309;font-size:14px;font-weight:700;">(0)</span></h2>
+      <p style="font-size: 12px; color: rgba(14,66,49,0.6); margin-bottom: 12px;">Versets marqués comme difficiles depuis la vue Aujourd'hui. À retravailler en priorité.</p>
+      <div id="errors-list"></div>
     </div>
   </div>
 
@@ -840,6 +962,13 @@
       </div>
 
       <div class="modal-card">
+        <button class="btn-secondary" onclick="openErrors()" style="width:100%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Mes versets difficiles <span id="errors-count-settings" style="margin-left:6px;background:#B45309;color:white;padding:1px 8px;border-radius:999px;font-size:11px;">0</span>
+        </button>
+      </div>
+
+      <div class="modal-card">
         <div class="field-label" style="margin-bottom: 8px;">Sauvegarde</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <button class="btn-secondary" onclick="exportData()" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
@@ -927,6 +1056,7 @@
   let currentDay = 1;
   let progress = {};
   let strictMode = false;
+  let errors = {};             // { "2:14": {addedAt: ISO}, ... } — versets difficiles
 
   // ============================================================
   // INIT
@@ -955,9 +1085,64 @@
     renderToday();
     updateHeader();
     maybeShowOnboarding();
+    maybeShowBackupReminder();
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
+  }
+
+  // ============================================================
+  // BACKUP REMINDER (toast tous les 30 jours)
+  // ============================================================
+  function maybeShowBackupReminder() {
+    if (Object.keys(progress).length === 0) return; // pas de données → rien à sauver
+    const lastBackup = localStorage.getItem('tikrar:lastBackup');
+    const now = Date.now();
+    if (!lastBackup) {
+      // Premier rappel après 30 jours d'usage
+      const firstUse = localStorage.getItem('tikrar:firstUse');
+      if (!firstUse) {
+        localStorage.setItem('tikrar:firstUse', String(now));
+        return;
+      }
+      const daysSinceFirstUse = Math.floor((now - parseInt(firstUse)) / 86400000);
+      if (daysSinceFirstUse >= 30) {
+        setTimeout(() => showToast('Pense à exporter tes données ⚙'), 1500);
+      }
+    } else {
+      const daysSinceBackup = Math.floor((now - parseInt(lastBackup)) / 86400000);
+      if (daysSinceBackup >= 30) {
+        setTimeout(() => showToast('30 jours sans sauvegarde — exporte ⚙'), 1500);
+      }
+    }
+  }
+
+  // ============================================================
+  // RYTHME CALENDAIRE
+  // ============================================================
+  // Retourne { expected, diff } ou null si pas de startDate
+  function calculateRhythm() {
+    const sd = localStorage.getItem('tikrar:startDate');
+    if (!sd) return null;
+    const startMs = new Date(sd + 'T00:00:00').getTime();
+    if (isNaN(startMs)) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const elapsed = Math.floor((today.getTime() - startMs) / 86400000);
+    if (elapsed < 0) return null;
+    const expected = elapsed + 1;
+    return { expected, diff: expected - currentDay };
+  }
+
+  // ============================================================
+  // STATS RAPIDES (pages + juz mémorisés)
+  // ============================================================
+  function calculateJuzMemorized() {
+    let n = 0;
+    for (let juz = 1; juz <= 30; juz++) {
+      const days = programData.filter(d => !d.isClosing && d.juz === juz);
+      if (days.length > 0 && days.every(dd => isDayComplete(dd.day))) n++;
+    }
+    return n;
   }
 
   // Active le mode soirée entre 19h et 6h
@@ -979,6 +1164,7 @@
     try {
       currentDay = parseInt(localStorage.getItem('tikrar:currentDay')) || 1;
       progress = JSON.parse(localStorage.getItem('tikrar:progress') || '{}');
+      errors = JSON.parse(localStorage.getItem('tikrar:errors') || '{}');
       strictMode = localStorage.getItem('tikrar:strict') === '1';
       const sd = localStorage.getItem('tikrar:startDate');
       if (sd) {
@@ -988,12 +1174,13 @@
       const sw = document.getElementById('switch-strict');
       if (sw) sw.classList.toggle('on', strictMode);
     } catch (e) {
-      currentDay = 1; progress = {}; strictMode = false;
+      currentDay = 1; progress = {}; strictMode = false; errors = {};
     }
   }
   function saveState() {
     localStorage.setItem('tikrar:currentDay', String(currentDay));
     localStorage.setItem('tikrar:progress', JSON.stringify(progress));
+    localStorage.setItem('tikrar:errors', JSON.stringify(errors));
   }
 
   // ============================================================
@@ -1202,6 +1389,12 @@
     // En-tête du jour
     document.getElementById('today-daynum').textContent = 'Jour ' + currentDay + ' / ' + TOTAL_DAYS;
 
+    // Quick-stats (pages + juz mémorisés)
+    const pgs = calculatePagesMemorized();
+    const jz = calculateJuzMemorized();
+    document.getElementById('today-quickstats').innerHTML =
+      '<strong>' + pgs + '</strong>/604 pages<span class="sep">·</span><strong>' + jz + '</strong>/30 juz';
+
     const pageEl = document.getElementById('today-page');
     const sourateEl = document.getElementById('today-sourate');
     const pillsEl = document.getElementById('today-pills');
@@ -1258,6 +1451,24 @@
 
     // Notes
     document.getElementById('today-notes-input').value = (p.notes) || '';
+
+    // Compteur de difficultés du jour (versets marqués qui sont dans la portion d'aujourd'hui)
+    const memoVerses = d.isClosing ? null : getVersesForTask(d.mushafPage, d.part);
+    let diffCount = 0;
+    if (memoVerses) {
+      memoVerses.forEach(c => {
+        for (let a = c.f; a <= c.t; a++) if (errors[c.s + ':' + a]) diffCount++;
+      });
+    }
+    const dBtn = document.getElementById('diff-btn');
+    const dCount = document.getElementById('diff-count');
+    if (d.isClosing) {
+      dBtn.style.display = 'none';
+    } else {
+      dBtn.style.display = '';
+      if (diffCount > 0) { dCount.style.display = ''; dCount.textContent = diffCount; }
+      else dCount.style.display = 'none';
+    }
 
     // Day nav center label
     document.getElementById('day-nav-center').textContent = 'JOUR ' + currentDay + ' / ' + TOTAL_DAYS;
@@ -1466,6 +1677,21 @@
     const s = calculateStreak();
     document.getElementById('streak-num').textContent = s;
     document.getElementById('streak-pill').classList.toggle('zero', s === 0);
+
+    // Pill calendaire : visible seulement si écart > 1 jour
+    const rhythm = calculateRhythm();
+    const pill = document.getElementById('cal-pill');
+    if (!rhythm || Math.abs(rhythm.diff) <= 1) {
+      pill.classList.remove('show', 'behind', 'ahead');
+    } else if (rhythm.diff > 0) {
+      pill.className = 'cal-pill show behind';
+      pill.textContent = '-' + rhythm.diff + 'j';
+      pill.title = 'En retard de ' + rhythm.diff + ' jours';
+    } else {
+      pill.className = 'cal-pill show ahead';
+      pill.textContent = '+' + (-rhythm.diff) + 'j';
+      pill.title = 'En avance de ' + (-rhythm.diff) + ' jours';
+    }
   }
 
   // Wrapper utilisé depuis le carnet : set le jour + ferme la modal
@@ -1473,6 +1699,82 @@
     haptic(10);
     setActiveDay(day);
     closeModal('modal-carnet');
+  }
+
+  // ============================================================
+  // ERREURS / VERSETS DIFFICILES
+  // ============================================================
+  function openDiffPicker() {
+    haptic(10);
+    const d = programData[currentDay - 1];
+    if (!d || d.isClosing) return;
+    const verses = getVersesForTask(d.mushafPage, d.part);
+    if (!verses || !verses.length) return;
+    const flatVerses = [];
+    verses.forEach(c => { for (let a = c.f; a <= c.t; a++) flatVerses.push({s: c.s, a}); });
+    const chips = document.getElementById('diff-chips');
+    chips.innerHTML = flatVerses.map(v => {
+      const key = v.s + ':' + v.a;
+      const marked = !!errors[key];
+      return '<span class="verse-chip' + (marked ? ' marked' : '') + '" onclick="toggleErrorVerse(\'' + key + '\', this)">' +
+        SURAH_NAMES[v.s - 1] + ' ' + v.a +
+      '</span>';
+    }).join('');
+    document.getElementById('modal-diff').classList.add('open');
+  }
+
+  function toggleErrorVerse(key, el) {
+    haptic(8);
+    if (errors[key]) {
+      delete errors[key];
+      el.classList.remove('marked');
+    } else {
+      errors[key] = { addedAt: new Date().toISOString() };
+      el.classList.add('marked');
+    }
+    saveState();
+    // MAJ du compteur sur le bouton "Marquer difficulté"
+    renderToday();
+  }
+
+  function openErrors() {
+    const keys = Object.keys(errors);
+    document.getElementById('errors-count').textContent = '(' + keys.length + ')';
+    const list = document.getElementById('errors-list');
+    if (!keys.length) {
+      list.innerHTML = '<div class="err-empty">Aucun verset difficile marqué pour l\'instant.</div>';
+    } else {
+      // Trier par surah:ayah
+      keys.sort((a, b) => {
+        const [sa, aa] = a.split(':').map(Number);
+        const [sb, ab] = b.split(':').map(Number);
+        return sa - sb || aa - ab;
+      });
+      list.innerHTML = keys.map(k => {
+        const [s, a] = k.split(':');
+        const e = errors[k];
+        const date = e.addedAt ? new Date(e.addedAt).toLocaleDateString('fr-FR') : '';
+        return '<div class="err-list-item">' +
+          '<div><div class="verse">' + SURAH_NAMES[parseInt(s) - 1] + ' ' + a + '</div>' +
+          (date ? '<div class="date">marqué le ' + date + '</div>' : '') + '</div>' +
+          '<button class="rm" onclick="removeError(\'' + k + '\')" aria-label="Retirer">✕</button>' +
+        '</div>';
+      }).join('');
+    }
+    document.getElementById('modal-errors').classList.add('open');
+  }
+
+  function removeError(key) {
+    delete errors[key];
+    saveState();
+    openErrors(); // refresh list
+    renderToday(); // refresh count on diff-btn
+    updateSettingsErrorsBadge();
+  }
+
+  function updateSettingsErrorsBadge() {
+    const el = document.getElementById('errors-count-settings');
+    if (el) el.textContent = Object.keys(errors).length;
   }
 
   // ============================================================
@@ -1516,6 +1818,7 @@
   function openSettings() {
     document.getElementById('set-current-day').value = currentDay;
     document.getElementById('switch-strict').classList.toggle('on', strictMode);
+    updateSettingsErrorsBadge();
     document.getElementById('modal-settings').classList.add('open');
   }
   function closeModal(id) {
@@ -1757,13 +2060,14 @@
   // EXPORT / IMPORT / RESET
   // ============================================================
   function exportData() {
-    const data = { version: 3, exportDate: new Date().toISOString(), currentDay, strict: strictMode, startDate: localStorage.getItem('tikrar:startDate'), progress };
+    const data = { version: 4, exportDate: new Date().toISOString(), currentDay, strict: strictMode, startDate: localStorage.getItem('tikrar:startDate'), progress, errors };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'tikrar-backup-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click(); URL.revokeObjectURL(url);
-    showToast('Exporté');
+    localStorage.setItem('tikrar:lastBackup', String(Date.now()));
+    showToast('Exporté ✓');
   }
   function importData(event) {
     const f = event.target.files[0]; if (!f) return;
@@ -1772,6 +2076,7 @@
       try {
         const data = JSON.parse(e.target.result);
         if (data.progress) progress = data.progress;
+        if (data.errors && typeof data.errors === 'object') errors = data.errors;
         if (data.currentDay) currentDay = data.currentDay;
         if (data.startDate) localStorage.setItem('tikrar:startDate', data.startDate);
         if (typeof data.strict === 'boolean') {
@@ -1791,8 +2096,8 @@
   }
   function resetAll() {
     if (confirm('Supprimer TOUTES les données ?') && confirm('Vraiment ?')) {
-      ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded'].forEach(k => localStorage.removeItem(k));
-      currentDay = 1; progress = {}; strictMode = false;
+      ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded','tikrar:errors','tikrar:lastBackup','tikrar:firstUse'].forEach(k => localStorage.removeItem(k));
+      currentDay = 1; progress = {}; strictMode = false; errors = {};
       document.getElementById('switch-strict').classList.remove('on');
       renderToday();
       if (document.getElementById('row-1')) renderAll();

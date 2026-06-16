@@ -591,24 +591,32 @@
       background: white;
     }
     .surah-row {
-      display: grid; grid-template-columns: 28px 1fr 60px 38px;
+      display: grid; grid-template-columns: 24px 1fr 60px 56px;
       gap: 8px; align-items: center;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-bottom: 1px solid rgba(14,66,49,0.04);
-      font-size: 12px;
+      font-size: 12px; cursor: pointer;
     }
     .surah-row:last-child { border-bottom: none; }
     .surah-row:active { background: rgba(14,66,49,0.02); }
     .surah-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); font-variant-numeric: tabular-nums; }
-    .surah-name { font-weight: 700; color: #0E4231; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .surah-info { min-width: 0; }
+    .surah-name { font-weight: 700; color: #0E4231; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+    .surah-verses { font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .surah-verses .rem { color: #B45309; }
+    .surah-row.complete .surah-verses { color: #15573B; }
+    .surah-row.complete .surah-name { color: #15573B; }
     .surah-bar-wrap { height: 5px; background: rgba(14,66,49,0.06); border-radius: 999px; overflow: hidden; }
     .surah-bar-fill { height: 100%; border-radius: 999px; transition: width .4s; }
     .surah-row.complete .surah-bar-fill { background: linear-gradient(90deg, #52A57A, #15573B); }
     .surah-row.half .surah-bar-fill     { background: linear-gradient(90deg, #7CC09B, #308A60); }
     .surah-row.partial .surah-bar-fill  { background: linear-gradient(90deg, #E6C36A, #B98947); }
     .surah-row.empty .surah-bar-fill    { background: rgba(14,66,49,0.15); }
-    .surah-pct { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.6); font-variant-numeric: tabular-nums; text-align: right; }
+    .surah-pct { font-size: 12px; font-weight: 800; color: rgba(14,66,49,0.7); font-variant-numeric: tabular-nums; text-align: right; }
     .surah-row.complete .surah-pct { color: #15573B; }
+    body.eve .surah-name { color: #E5F2EA; }
+    body.eve .surah-verses { color: rgba(255,255,255,0.55); }
+    body.eve .surah-verses .rem { color: #FCD34D; }
 
     /* ===== Reminder banner (intra-app) ===== */
     .reminder-banner {
@@ -2398,9 +2406,18 @@
       const name = SURAH_NAMES[s - 1];
       if (term && !name.toLowerCase().includes(term) && !String(s).includes(term)) continue;
       const cls = pct >= 100 ? 'complete' : pct >= 50 ? 'half' : pct > 0 ? 'partial' : 'empty';
+      const rem = st.total - st.done;
+      let versesLine;
+      if (pct >= 100) versesLine = '✓ ' + st.total + ' versets';
+      else if (st.done === 0) versesLine = st.total + ' versets';
+      else versesLine = st.done + ' / ' + st.total + ' versets · <span class="rem">' + rem + ' restants</span>';
+
       html += '<div class="surah-row ' + cls + '" onclick="jumpToSurah(' + s + ')">' +
         '<div class="surah-num">' + s + '</div>' +
-        '<div class="surah-name">' + name + '</div>' +
+        '<div class="surah-info">' +
+          '<div class="surah-name">' + name + '</div>' +
+          '<div class="surah-verses">' + versesLine + '</div>' +
+        '</div>' +
         '<div class="surah-bar-wrap"><div class="surah-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<div class="surah-pct">' + pct + '%</div>' +
       '</div>';

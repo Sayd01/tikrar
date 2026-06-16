@@ -305,6 +305,276 @@
     .missed-row.zero > span:first-child { color: rgba(48, 138, 96, 0.7); }
     .missed-row.zero > span:first-child .icon { color: rgba(48, 138, 96, 0.5); }
 
+    /* =====================================================
+       NOUVELLE UI : "TODAY ONLY"
+       ===================================================== */
+    .today-wrap {
+      max-width: 540px; margin: 0 auto;
+      padding: 4px 18px 130px;
+      min-height: calc(100vh - 56px);
+      display: flex; flex-direction: column;
+    }
+
+    /* Hero */
+    .today-hero {
+      padding: 24px 6px 18px;
+      text-align: center;
+    }
+    .today-daynum {
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(14,66,49,0.5);
+      font-variant-numeric: tabular-nums;
+    }
+    .today-page {
+      font-size: 30px; font-weight: 800; color: #073026;
+      letter-spacing: -0.025em; margin-top: 6px;
+      line-height: 1.1;
+    }
+    .today-page .part {
+      color: #B98947; font-size: 18px; font-weight: 700; margin-left: 4px;
+      vertical-align: 4px;
+    }
+    .today-sourate {
+      font-size: 22px; font-weight: 700;
+      margin-top: 4px; letter-spacing: -0.01em;
+    }
+    .today-sourate.makkan { color: #946930; }
+    .today-sourate.medinan { color: #308A60; }
+    .today-pills {
+      display: flex; justify-content: center; gap: 6px;
+      margin-top: 10px;
+    }
+    .today-pills .pill {
+      padding: 3px 11px; border-radius: 999px;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .today-pills .pill.makkan { background: #F8ECCC; color: #946930; }
+    .today-pills .pill.medinan { background: #D6ECDF; color: #15573B; }
+    .today-pills .pill.juz { background: rgba(48,138,96,0.08); color: #15573B; border: 1px solid rgba(48,138,96,0.18); }
+    .today-pills .pill.closing { background: #F8ECCC; color: #946930; }
+
+    /* Streak header pill */
+    .streak-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 800;
+      color: #B91C1C;
+      background: rgba(220,38,38,0.08);
+      padding: 4px 10px; border-radius: 999px;
+      font-variant-numeric: tabular-nums;
+    }
+    .streak-pill.zero { color: rgba(14,66,49,0.45); background: rgba(14,66,49,0.06); }
+    .streak-pill .fire { font-size: 13px; }
+
+    /* Task cards (gros, tappables) */
+    .today-tasks { margin-top: 18px; flex: 1; }
+    .tcard {
+      background: white;
+      border: 1.5px solid rgba(14,66,49,0.07);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: transform .15s, border-color .25s, background .35s, box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .tcard:active { transform: scale(0.985); }
+    .tcard.done {
+      background: linear-gradient(135deg, #EEF7F1, #D6ECDF);
+      border-color: rgba(48,138,96,0.35);
+      box-shadow: 0 4px 16px rgba(48,138,96,0.1);
+    }
+    .tcard-head { display: flex; align-items: center; gap: 14px; }
+    .tcard-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(48,138,96,0.12); color: #15573B;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .35s;
+    }
+    .tcard.done .tcard-icon { background: #308A60; color: white; }
+    .tcard-icon svg { width: 22px; height: 22px; }
+    .tcard-body { flex: 1; min-width: 0; }
+    .tcard-label {
+      font-size: 10px; font-weight: 800; color: rgba(14,66,49,0.55);
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .tcard-content {
+      font-size: 17px; font-weight: 800; color: #0E4231;
+      line-height: 1.25; margin-top: 2px;
+      letter-spacing: -0.015em;
+    }
+    .tcard-extra {
+      font-size: 12px; font-weight: 600; color: rgba(14,66,49,0.6);
+      margin-top: 3px; line-height: 1.4;
+    }
+    .tcard-check {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2.5px solid rgba(14,66,49,0.18);
+      background: white;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .25s cubic-bezier(.16,1,.3,1);
+    }
+    .tcard.done .tcard-check {
+      background: linear-gradient(135deg, #308A60, #15573B);
+      border-color: #15573B;
+      box-shadow: 0 2px 8px rgba(48,138,96,0.35);
+    }
+    .tcard-check svg { opacity: 0; transform: scale(0.5); transition: all .25s; color: white; }
+    .tcard.done .tcard-check svg { opacity: 1; transform: scale(1); }
+
+    /* Day navigation footer */
+    .day-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(250, 246, 236, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(14,66,49,0.08);
+      padding: 10px 18px;
+      z-index: 30;
+    }
+    .day-nav-inner {
+      max-width: 540px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: 10px; align-items: center;
+    }
+    .day-nav-btn {
+      padding: 11px 14px;
+      background: white;
+      border: 1px solid rgba(14,66,49,0.1);
+      border-radius: 14px;
+      font-size: 13px; font-weight: 700;
+      color: #0E4231;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s;
+    }
+    .day-nav-btn:hover { background: rgba(48,138,96,0.04); border-color: rgba(48,138,96,0.2); }
+    .day-nav-btn:active { transform: scale(0.97); }
+    .day-nav-btn.locked { opacity: 0.4; cursor: not-allowed; }
+    .day-nav-center {
+      font-size: 11px; font-weight: 800;
+      color: rgba(14,66,49,0.55);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 8px;
+      cursor: pointer;
+    }
+    .day-nav-center:hover { color: #15573B; }
+    @supports (padding: max(0px)) {
+      .day-nav { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+    }
+
+    /* Notes inline */
+    .today-notes {
+      margin-top: 14px;
+      background: white;
+      border: 1px solid rgba(14,66,49,0.07);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .today-notes-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(14,66,49,0.5);
+      margin-bottom: 4px;
+    }
+    .today-notes textarea {
+      width: 100%; border: none; outline: none;
+      background: transparent;
+      font-size: 13px; font-weight: 500; color: #1A1F2C;
+      font-family: inherit; resize: none;
+      min-height: 32px;
+      line-height: 1.4;
+    }
+    .today-notes textarea::placeholder { color: rgba(14,66,49,0.35); font-style: italic; }
+
+    /* Celebration overlay */
+    .celebration {
+      position: fixed; inset: 0; z-index: 65;
+      background: rgba(7, 48, 38, 0.55);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 30px;
+    }
+    .celebration.show { display: flex; animation: fadeIn 0.4s ease; }
+    .celebration-card {
+      background: linear-gradient(135deg, #15573B 0%, #073026 100%);
+      color: white;
+      border-radius: 24px;
+      padding: 36px 28px 28px;
+      max-width: 360px; width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(7,48,38,0.5);
+      animation: slideUp 0.4s cubic-bezier(.16,1,.3,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .celebration-card::before {
+      content: ''; position: absolute; inset: 0;
+      opacity: 0.15;
+      background: radial-gradient(circle at 25% 25%, white 1.5px, transparent 1.5px),
+                  radial-gradient(circle at 75% 75%, white 1px, transparent 1px);
+      background-size: 32px 32px, 18px 18px;
+    }
+    .celebration-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 32px; font-weight: 700;
+      margin-bottom: 6px;
+      position: relative;
+    }
+    .celebration-msg {
+      font-size: 13px; color: rgba(255,255,255,0.85);
+      line-height: 1.5; margin-bottom: 22px;
+      position: relative;
+    }
+    .celebration-btn {
+      background: white; color: #15573B;
+      padding: 13px 24px; border-radius: 999px;
+      font-size: 14px; font-weight: 800;
+      border: none; cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      transition: transform .15s;
+      position: relative;
+    }
+    .celebration-btn:active { transform: scale(0.95); }
+
+    /* Mode soirée (auto-applied via class on body) */
+    body.eve {
+      background: #0E1B14;
+      color: #E5F2EA;
+    }
+    body.eve .hdr { background: rgba(14, 27, 20, 0.85); border-color: rgba(255,255,255,0.06); }
+    body.eve .hdr-title { color: #E5F2EA; }
+    body.eve .hdr-btn { color: #94806F; }
+    body.eve .hdr-btn:hover { background: rgba(255,255,255,0.05); }
+    body.eve .today-daynum { color: rgba(255,255,255,0.4); }
+    body.eve .today-page { color: #FCF7EB; }
+    body.eve .today-sourate.makkan { color: #E6C36A; }
+    body.eve .today-sourate.medinan { color: #7CC09B; }
+    body.eve .tcard {
+      background: #142822; border-color: rgba(255,255,255,0.06);
+    }
+    body.eve .tcard.done {
+      background: linear-gradient(135deg, #1A3A28, #0F2A1C);
+      border-color: rgba(48,138,96,0.5);
+    }
+    body.eve .tcard-icon { background: rgba(48,138,96,0.2); color: #7CC09B; }
+    body.eve .tcard-label { color: rgba(255,255,255,0.5); }
+    body.eve .tcard-content { color: #E5F2EA; }
+    body.eve .tcard-extra { color: rgba(255,255,255,0.55); }
+    body.eve .tcard-check { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    body.eve .day-nav { background: rgba(14, 27, 20, 0.92); border-color: rgba(255,255,255,0.06); }
+    body.eve .day-nav-btn { background: #142822; color: #E5F2EA; border-color: rgba(255,255,255,0.08); }
+    body.eve .day-nav-btn:hover { background: #1A3A28; }
+    body.eve .day-nav-center { color: rgba(255,255,255,0.5); }
+    body.eve .today-notes { background: #142822; border-color: rgba(255,255,255,0.06); }
+    body.eve .today-notes-label { color: rgba(255,255,255,0.45); }
+    body.eve .today-notes textarea { color: #E5F2EA; }
+    body.eve .streak-pill { background: rgba(220,38,38,0.15); }
+
     /* ===== TOAST ===== */
     .toast {
       position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-16px);
@@ -349,11 +619,14 @@
     <div class="hdr-row">
       <div class="hdr-title">
         <span class="arabic">تكرار</span>
-        <button class="hdr-counter tabular" onclick="jumpToCurrent()" aria-label="Aller au jour courant">
-          Jour <span id="hd-day">1</span> / 1988
-        </button>
+        <span class="streak-pill" id="streak-pill" title="Série en cours">
+          <span class="fire">🔥</span><span id="streak-num">0</span>
+        </span>
       </div>
       <div class="hdr-actions">
+        <button class="hdr-btn" onclick="openCarnet()" aria-label="Carnet">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
         <button class="hdr-btn" onclick="openStats()" aria-label="Statistiques">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-7"/></svg>
         </button>
@@ -364,23 +637,61 @@
     </div>
   </header>
 
-  <!-- ============ LEGEND ============ -->
-  <div class="legend">
-    <div>Jour</div>
-    <div>Page</div>
-    <div>Sourate</div>
-    <div>M · L · R</div>
-  </div>
+  <!-- ============ MAIN : TODAY ONLY ============ -->
+  <main class="today-wrap">
+    <div class="today-hero">
+      <div class="today-daynum" id="today-daynum">Jour 1 / 1988</div>
+      <div class="today-page" id="today-page">—</div>
+      <div class="today-sourate" id="today-sourate">—</div>
+      <div class="today-pills" id="today-pills"></div>
+    </div>
 
-  <!-- ============ ROWS ============ -->
-  <main>
-    <div id="rows"></div>
+    <div class="today-tasks" id="today-tasks"></div>
+
+    <div class="today-notes">
+      <div class="today-notes-label">Notes du jour</div>
+      <textarea id="today-notes-input" rows="1" placeholder="Erreurs récurrentes, versets difficiles…" onblur="saveTodayNotes(this.value)"></textarea>
+    </div>
   </main>
 
-  <!-- ============ FAB ============ -->
-  <button class="fab" id="fab-current" onclick="jumpToCurrent()" aria-label="Jour courant">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 12H2M22 12h-3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2"/></svg>
-  </button>
+  <!-- Day navigation footer -->
+  <div class="day-nav">
+    <div class="day-nav-inner">
+      <button class="day-nav-btn" onclick="navigateDay(-1)" id="btn-prev">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Hier
+      </button>
+      <div class="day-nav-center" onclick="openCarnet()" id="day-nav-center">JOUR 1 / 1988</div>
+      <button class="day-nav-btn" onclick="navigateDay(1)" id="btn-next">
+        Demain
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL : CARNET (toute l'historique) ============ -->
+  <div id="modal-carnet" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-carnet')">
+    <div class="modal-sheet" style="padding: 16px 0 30px;">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" style="padding: 0 18px;">Le Carnet</h2>
+      <div class="legend">
+        <div>Jour</div>
+        <div>Page</div>
+        <div>Sourate</div>
+        <div>M · L · R</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div>
+
+  <!-- ============ CELEBRATION (3/3 done) ============ -->
+  <div id="celebration" class="celebration" onclick="closeCelebration()">
+    <div class="celebration-card">
+      <div class="celebration-arabic">ما شاء الله</div>
+      <div class="celebration-msg">Tu as terminé ce jour.<br>Qu'Allah facilite ta mémorisation.</div>
+      <button class="celebration-btn" onclick="event.stopPropagation();celebrationNext()">Jour suivant →</button>
+    </div>
+  </div>
 
   <!-- ============ MODAL : STATS ============ -->
   <div id="modal-stats" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-stats')">
@@ -563,7 +874,6 @@
   let currentDay = 1;
   let progress = {};
   let strictMode = false;
-  let _scrollObserver = null;
 
   // ============================================================
   // INIT
@@ -579,17 +889,28 @@
       const r2 = await fetch('./data/quran-pages.json');
       quranPages = await r2.json();
     } catch (e) {
-      quranPages = {};   // si non disponible (file://), on n'affichera pas les versets
+      quranPages = {};
     }
     loadState();
-    renderAll();
+    applyEveMode();
+    renderToday();
     updateHeader();
-    setupScrollObserver();
-    setTimeout(() => scrollToDay(currentDay, false), 50);
     maybeShowOnboarding();
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
+  }
+
+  // Active le mode soirée entre 19h et 6h
+  function applyEveMode() {
+    const h = new Date().getHours();
+    const eve = h >= 19 || h < 6;
+    document.body.classList.toggle('eve', eve);
+  }
+
+  // Vibration tactile au tap (Android)
+  function haptic(ms) {
+    if (navigator.vibrate) try { navigator.vibrate(ms || 12); } catch (e) {}
   }
 
   // ============================================================
@@ -774,7 +1095,82 @@
   }
 
   // ============================================================
-  // RENDER
+  // RENDER : TODAY (vue principale)
+  // ============================================================
+  function renderToday() {
+    const d = programData[currentDay - 1];
+    if (!d) return;
+
+    // En-tête du jour
+    document.getElementById('today-daynum').textContent = 'Jour ' + currentDay + ' / ' + TOTAL_DAYS;
+
+    const pageEl = document.getElementById('today-page');
+    const sourateEl = document.getElementById('today-sourate');
+    const pillsEl = document.getElementById('today-pills');
+
+    if (d.isClosing) {
+      pageEl.innerHTML = 'Phase de clôture';
+      sourateEl.textContent = '';
+      sourateEl.className = 'today-sourate';
+      pillsEl.innerHTML =
+        '<span class="pill closing">Clôture ' + d.closingTour + ' / 30</span>' +
+        '<span class="pill closing">Jour ' + d.closingDay + ' / 6</span>';
+    } else {
+      pageEl.innerHTML = 'Page ' + d.mushafPage + (d.part ? '<span class="part">' + d.part + '</span>' : '');
+      sourateEl.textContent = d.sourate;
+      sourateEl.className = 'today-sourate ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan');
+      pillsEl.innerHTML =
+        '<span class="pill ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan') + '">' +
+          (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + '</span>' +
+        '<span class="pill juz">Juz ' + d.juz + '</span>' +
+        (d.tourNumber > 0 ? '<span class="pill juz">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '');
+    }
+
+    // Cartes des tâches
+    const tasks = getApplicableTasks(d);
+    const p = progress[currentDay] || {};
+    let html = '';
+    tasks.forEach(t => {
+      const done = p[t.id] === true;
+      html += '<div class="tcard' + (done ? ' done' : '') + '" id="tcard-' + t.id + '" onclick="onTaskTap(\'' + t.id + '\')">' +
+        '<div class="tcard-head">' +
+          '<div class="tcard-icon">' + t.icon + '</div>' +
+          '<div class="tcard-body">' +
+            '<div class="tcard-label">' + t.label + '</div>' +
+            '<div class="tcard-content">' + escapeHtml(t.content) + '</div>' +
+            (t.extra ? '<div class="tcard-extra">' + escapeHtml(t.extra) + '</div>' : '') +
+          '</div>' +
+          '<div class="tcard-check">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    document.getElementById('today-tasks').innerHTML = html;
+
+    // Notes
+    document.getElementById('today-notes-input').value = (p.notes) || '';
+
+    // Day nav center label
+    document.getElementById('day-nav-center').textContent = 'JOUR ' + currentDay + ' / ' + TOTAL_DAYS;
+    // Locked states
+    document.getElementById('btn-prev').classList.toggle('locked', currentDay <= 1);
+    document.getElementById('btn-next').classList.toggle('locked', currentDay >= TOTAL_DAYS);
+  }
+
+  function onTaskTap(taskId) {
+    haptic(12);
+    toggleTask(currentDay, taskId);
+  }
+
+  function saveTodayNotes(val) {
+    if (!progress[currentDay]) progress[currentDay] = {};
+    progress[currentDay].notes = val;
+    saveState();
+  }
+
+  // ============================================================
+  // RENDER : CARNET (modal)
   // ============================================================
   function renderAll() {
     const c = document.getElementById('rows');
@@ -825,7 +1221,7 @@
     if (done) cls += ' done';
     else if (partial) cls += ' partial';
 
-    return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setActiveDay(' + day + ')">' +
+    return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setDayFromCarnet(' + day + ')">' +
       '<div class="day">' + day + '</div>' +
       '<div class="page">' + pageHtml + '</div>' +
       '<div class="sourate ' + sourateCls + '">' + sourateHtml + '</div>' +
@@ -901,10 +1297,21 @@
     const oldDay = currentDay;
     currentDay = newDay;
     saveState();
-    replaceRow(oldDay);
-    replaceRow(newDay);
+    if (document.getElementById('row-' + oldDay)) replaceRow(oldDay);
+    if (document.getElementById('row-' + newDay)) replaceRow(newDay);
+    renderToday();
     updateHeader();
-    setTimeout(() => scrollToDay(newDay, true), 30);
+  }
+
+  function navigateDay(delta) {
+    const newDay = currentDay + delta;
+    if (delta > 0 && strictMode && !isDayComplete(currentDay)) {
+      showToast('Mode strict : termine d\'abord ce jour');
+      return;
+    }
+    if (newDay < 1 || newDay > TOTAL_DAYS) return;
+    haptic(10);
+    setActiveDay(newDay);
   }
 
   function replaceRow(day) {
@@ -914,10 +1321,6 @@
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     el.parentNode.replaceChild(tmp.firstChild, el);
-    if (_scrollObserver) {
-      const newEl = document.getElementById('row-' + day);
-      if (newEl) _scrollObserver.observe(newEl);
-    }
   }
 
   function toggleTask(day, taskId) {
@@ -925,11 +1328,23 @@
     const wasOn = progress[day][taskId] === true;
     progress[day][taskId] = !wasOn;
     saveState();
-    replaceRow(day);
-    if (!wasOn && isDayComplete(day)) showConfetti();
+
+    // MAJ today (visuelle ciblée)
+    const card = document.getElementById('tcard-' + taskId);
+    if (card) card.classList.toggle('done', !wasOn);
+
+    // MAJ carnet si rendu
+    if (document.getElementById('row-' + day)) replaceRow(day);
+    updateHeader();
+
+    if (!wasOn && isDayComplete(day)) {
+      showConfetti();
+      setTimeout(showCelebration, 350);
+    }
   }
 
   function quickToggle(day, taskId) {
+    haptic(10);
     toggleTask(day, taskId);
   }
 
@@ -939,33 +1354,47 @@
     saveState();
   }
 
-  function scrollToDay(day, smooth) {
-    const el = document.getElementById('row-' + day);
-    if (el) el.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
-  }
-
-  function jumpToCurrent() {
-    scrollToDay(currentDay, true);
-  }
-
   function updateHeader() {
-    document.getElementById('hd-day').textContent = currentDay;
+    const s = calculateStreak();
+    document.getElementById('streak-num').textContent = s;
+    document.getElementById('streak-pill').classList.toggle('zero', s === 0);
+  }
+
+  // Wrapper utilisé depuis le carnet : set le jour + ferme la modal
+  function setDayFromCarnet(day) {
+    haptic(10);
+    setActiveDay(day);
+    closeModal('modal-carnet');
   }
 
   // ============================================================
-  // FAB : show when current day is off-screen
+  // CARNET (modal)
   // ============================================================
-  function setupScrollObserver() {
-    if (!('IntersectionObserver' in window)) return;
-    _scrollObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (parseInt(entry.target.dataset.day) === currentDay) {
-          document.getElementById('fab-current').classList.toggle('show', !entry.isIntersecting);
-        }
-      });
-    }, { rootMargin: '-100px 0px -100px 0px' });
-    const cur = document.getElementById('row-' + currentDay);
-    if (cur) _scrollObserver.observe(cur);
+  function openCarnet() {
+    haptic(10);
+    if (!document.getElementById('row-' + currentDay)) renderAll();
+    document.getElementById('modal-carnet').classList.add('open');
+    setTimeout(() => {
+      const el = document.getElementById('row-' + currentDay);
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    }, 80);
+  }
+
+  // ============================================================
+  // CÉLÉBRATION (3/3 fait)
+  // ============================================================
+  function showCelebration() {
+    document.getElementById('celebration').classList.add('show');
+  }
+  function closeCelebration() {
+    document.getElementById('celebration').classList.remove('show');
+  }
+  function celebrationNext() {
+    closeCelebration();
+    if (currentDay < TOTAL_DAYS) {
+      setActiveDay(currentDay + 1);
+      showToast('Jour ' + currentDay + ' — Bismillah');
+    }
   }
 
   // ============================================================
@@ -991,14 +1420,11 @@
   function settingsSetDay() {
     const v = parseInt(document.getElementById('set-current-day').value);
     if (v >= 1 && v <= TOTAL_DAYS) {
-      const oldDay = currentDay;
       currentDay = v;
       saveState();
-      replaceRow(oldDay);
-      replaceRow(v);
+      renderToday();
       updateHeader();
       closeModal('modal-settings');
-      setTimeout(() => scrollToDay(v, true), 80);
       showToast('Jour ' + v);
     }
   }
@@ -1030,9 +1456,7 @@
     if (day >= 1 && day <= TOTAL_DAYS) { currentDay = day; saveState(); }
     localStorage.setItem('tikrar:onboarded', '1');
     document.getElementById('onboarding').classList.remove('open');
-    renderAll();
-    setupScrollObserver();
-    setTimeout(() => scrollToDay(currentDay, false), 50);
+    renderToday();
     updateHeader();
   }
 
@@ -1247,9 +1671,9 @@
           localStorage.setItem('tikrar:strict', strictMode ? '1' : '0');
         }
         saveState();
-        renderAll();
-        setupScrollObserver();
-        setTimeout(() => scrollToDay(currentDay, false), 50);
+        renderToday();
+        // Re-rendre le carnet si déjà ouvert
+        if (document.getElementById('row-1')) renderAll();
         updateHeader();
         showToast('Importé');
       } catch (err) { showToast('Fichier invalide'); }
@@ -1262,8 +1686,8 @@
       ['tikrar:currentDay','tikrar:progress','tikrar:startDate','tikrar:strict','tikrar:onboarded'].forEach(k => localStorage.removeItem(k));
       currentDay = 1; progress = {}; strictMode = false;
       document.getElementById('switch-strict').classList.remove('on');
-      renderAll();
-      setupScrollObserver();
+      renderToday();
+      if (document.getElementById('row-1')) renderAll();
       closeModal('modal-settings');
       updateHeader();
       showToast('Réinitialisé');

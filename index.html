@@ -407,30 +407,45 @@
     body.eve .part-dot { border-color: rgba(230, 195, 106, 0.5); }
     body.eve .part-dot.active { background: #E6C36A; border-color: #E6C36A; box-shadow: 0 0 0 2px rgba(230, 195, 106, 0.15); }
 
-    /* Streak header pill */
+    /* Streak header pill — toujours visible */
     .streak-pill {
       display: inline-flex; align-items: center; gap: 4px;
       font-size: 12px; font-weight: 800;
       color: #B91C1C;
-      background: rgba(220,38,38,0.08);
+      background: rgba(220,38,38,0.1);
       padding: 4px 10px; border-radius: 999px;
-      font-variant-numeric: tabular-nums;
-    }
-    .streak-pill.zero { color: rgba(14,66,49,0.45); background: rgba(14,66,49,0.06); }
-    .streak-pill .fire { font-size: 13px; }
-
-    /* Indicateur de retard calendaire */
-    .cal-pill {
-      display: none;
-      align-items: center; gap: 3px;
-      font-size: 11px; font-weight: 700;
-      padding: 3px 9px; border-radius: 999px;
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.02em;
     }
+    .streak-pill.zero {
+      color: rgba(14,66,49,0.55);
+      background: rgba(14,66,49,0.07);
+      border: 1px dashed rgba(14,66,49,0.18);
+    }
+    .streak-pill .fire { font-size: 13px; }
+    .streak-pill.zero .fire { filter: grayscale(1) opacity(0.6); }
+    body.eve .streak-pill { background: rgba(252,211,77,0.15); color: #FCD34D; }
+    body.eve .streak-pill.zero { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); }
+
+    /* Indicateur de retard calendaire — toujours visible si startDate défini */
+    .cal-pill {
+      display: none;
+      align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 999px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+    }
     .cal-pill.show { display: inline-flex; }
-    .cal-pill.behind { background: rgba(245, 158, 11, 0.15); color: #B45309; }
-    .cal-pill.ahead  { background: rgba(48, 138, 96, 0.12); color: #15573B; }
+    .cal-pill.sync   { background: rgba(48, 138, 96, 0.15); color: #15573B; }
+    .cal-pill.behind { background: rgba(245, 158, 11, 0.18); color: #B45309; }
+    .cal-pill.ahead  { background: rgba(30, 58, 95, 0.12); color: #1E3A5F; }
+    .cal-pill.setup  { background: rgba(14, 66, 49, 0.06); color: rgba(14, 66, 49, 0.6); border: 1px dashed rgba(14, 66, 49, 0.2); }
+    body.eve .cal-pill.sync { background: rgba(48, 138, 96, 0.22); color: #7CC09B; }
+    body.eve .cal-pill.behind { background: rgba(245, 158, 11, 0.22); color: #FCD34D; }
+    body.eve .cal-pill.ahead { background: rgba(165, 195, 230, 0.18); color: #BFD7EE; }
+    body.eve .cal-pill.setup { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.18); }
 
     /* Quick stats sous le daynum */
     .today-quickstats {
@@ -1915,18 +1930,25 @@
     document.getElementById('streak-pill').classList.toggle('zero', s === 0);
     updateQuickStats();
 
-    // Pill calendaire : visible seulement si écart > 1 jour
+    // Pill calendaire : toujours visible (4 états)
     const rhythm = calculateRhythm();
     const pill = document.getElementById('cal-pill');
-    if (!rhythm || Math.abs(rhythm.diff) <= 1) {
-      pill.classList.remove('show', 'behind', 'ahead');
+    pill.onclick = openSettings;
+    if (!rhythm) {
+      pill.className = 'cal-pill show setup';
+      pill.innerHTML = '📅 Définis ta date';
+      pill.title = 'Tape pour définir ta date de début';
+    } else if (Math.abs(rhythm.diff) <= 1) {
+      pill.className = 'cal-pill show sync';
+      pill.innerHTML = '✓ à jour';
+      pill.title = 'Tu es synchronisé avec ton calendrier';
     } else if (rhythm.diff > 0) {
       pill.className = 'cal-pill show behind';
-      pill.textContent = '-' + rhythm.diff + 'j';
+      pill.innerHTML = '⚠ -' + rhythm.diff + 'j';
       pill.title = 'En retard de ' + rhythm.diff + ' jours';
     } else {
       pill.className = 'cal-pill show ahead';
-      pill.textContent = '+' + (-rhythm.diff) + 'j';
+      pill.innerHTML = '↑ +' + (-rhythm.diff) + 'j';
       pill.title = 'En avance de ' + (-rhythm.diff) + ' jours';
     }
   }

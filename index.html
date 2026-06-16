@@ -294,36 +294,51 @@
     .field-input:focus { outline: none; border-color: #308A60; }
     .field-help { font-size: 11px; color: rgba(14,66,49,0.55); margin-top: 5px; }
     .modal-card { background: white; border: 1px solid rgba(14,66,49,0.06); border-radius: 14px; padding: 14px; margin-bottom: 8px; }
-    .btn-primary { background: linear-gradient(135deg, #308A60, #15573B); color: white; font-weight: 700; padding: 11px 18px; border-radius: 12px; border: none; cursor: pointer; transition: all .2s; box-shadow: 0 4px 12px rgba(48,138,96,0.25); }
-    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, #308A60, #15573B); color: white; font-weight: 800; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all .2s; box-shadow: 0 4px 16px rgba(48,138,96,0.25); text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(48,138,96,0.35); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(48,138,96,0.2); }
     .btn-secondary { background: rgba(48,138,96,0.08); color: #15573B; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; }
     .btn-secondary:hover { background: rgba(48,138,96,0.15); }
     .btn-danger { background: rgba(220,38,38,0.07); color: #B91C1C; font-weight: 700; padding: 11px 16px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 13px; }
 
     /* ===== TASK STATS BARS (par tâche) ===== */
-    .task-bar { margin-bottom: 11px; }
+    .task-bar { margin-bottom: 12px; }
     .task-bar:last-child { margin-bottom: 0; }
-    .task-bar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
-    .task-bar-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; color: #0E4231; }
+    .task-bar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .task-bar-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #0E4231; }
     .task-bar-label .icon { width: 16px; height: 16px; color: #15573B; }
-    .task-bar-counts { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.65); font-variant-numeric: tabular-nums; }
-    .task-bar-counts .pct { color: #308A60; margin-left: 5px; }
-    .task-bar-track { height: 7px; background: rgba(14,66,49,0.06); border-radius: 999px; overflow: hidden; }
+    .task-bar-counts { font-size: 12px; font-weight: 800; color: #0E4231; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; }
+    .task-bar-counts .pct { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: rgba(48,138,96,0.1); color: #15803D; font-weight: 700; border: 1px solid rgba(48,138,96,0.15); }
+    .task-bar-track { height: 8px; background: rgba(14,66,49,0.05); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
     .task-bar-fill { height: 100%; background: linear-gradient(90deg, #52A57A, #15573B); border-radius: 999px; transition: width .6s cubic-bezier(.16,1,.3,1); }
     .task-bar.gold .task-bar-fill { background: linear-gradient(90deg, #D4A574, #946930); }
-    .task-bar.gold .task-bar-counts .pct { color: #946930; }
+    .task-bar.gold .task-bar-counts .pct { background: rgba(185,137,71,0.1); color: #B98947; border-color: rgba(185,137,71,0.15); }
 
     /* ===== BREAKDOWN ROWS (bilan jours) ===== */
-    .breakdown-row { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; font-size: 12px; }
-    .breakdown-dot { width: 10px; height: 10px; border-radius: 50%; justify-self: center; }
+    .breakdown-row { 
+      display: grid; grid-template-columns: 12px 1fr auto; gap: 12px; align-items: center; 
+      padding: 12px 14px; font-size: 13px; 
+      background: linear-gradient(145deg, #ffffff, #FAF6EC); 
+      border: 1px solid rgba(14,66,49,0.05); border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .breakdown-row:last-child { margin-bottom: 0; }
+    .breakdown-dot { width: 12px; height: 12px; border-radius: 50%; justify-self: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
     .breakdown-dot.complete { background: linear-gradient(135deg, #308A60, #15573B); }
     .breakdown-dot.partial { background: linear-gradient(135deg, #D4A574, #B98947); }
     .breakdown-dot.empty { background: rgba(14,66,49,0.18); }
-    .breakdown-label { font-weight: 600; color: #0E4231; display: flex; align-items: center; gap: 8px; }
-    .breakdown-bar { flex: 1; height: 4px; background: rgba(14,66,49,0.06); border-radius: 999px; margin-left: 10px; overflow: hidden; max-width: 110px; }
+    .breakdown-label { font-weight: 700; color: #0E4231; display: flex; align-items: center; gap: 10px; }
+    .breakdown-bar { flex: 1; height: 6px; background: rgba(14,66,49,0.05); border-radius: 999px; margin-left: 8px; overflow: hidden; max-width: 120px; }
     .breakdown-bar > div { height: 100%; border-radius: 999px; transition: width .5s; }
-    .breakdown-count { font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.75); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
-    .breakdown-count .pct { color: rgba(14,66,49,0.5); font-weight: 600; margin-left: 4px; }
+    .breakdown-count { font-size: 14px; font-weight: 800; color: #0E4231; font-variant-numeric: tabular-nums; text-align: right; min-width: 64px; }
+    .breakdown-count .pct { 
+      font-size: 11px; color: rgba(14,66,49,0.6); font-weight: 700; margin-left: 6px; 
+      background: white; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(14,66,49,0.06);
+    }
+    body.eve .breakdown-row { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+    body.eve .breakdown-label { color: #E5F2EA; }
+    body.eve .breakdown-count { color: #E5F2EA; }
+    body.eve .breakdown-count .pct { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-color: transparent; }
 
     /* ===== MISSED STATS ===== */
     .missed-title { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(14,66,49,0.55); margin-bottom: 8px; }
@@ -375,9 +390,10 @@
       margin-top: 10px;
     }
     .today-pills .pill {
-      padding: 3px 11px; border-radius: 999px;
-      font-size: 10px; font-weight: 800;
-      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 14px; border-radius: 999px;
+      font-size: 11px; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.4);
     }
     .today-pills .pill.makkan { background: #F8ECCC; color: #946930; }
     .today-pills .pill.medinan { background: #D6ECDF; color: #15573B; }
@@ -490,48 +506,54 @@
 
     /* Bouton "marquer difficulté" */
     .diff-btn {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      width: 100%; margin-top: 12px;
-      padding: 11px 14px;
-      background: rgba(245, 158, 11, 0.07);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; margin-top: 16px;
+      padding: 14px;
+      background: linear-gradient(145deg, #FFFCF5, #FFF5EB);
       border: 1px dashed rgba(245, 158, 11, 0.4);
-      border-radius: 12px;
-      font-size: 12px; font-weight: 700;
+      border-radius: 16px;
+      font-size: 13px; font-weight: 700;
       color: #B45309;
       cursor: pointer; font-family: inherit;
-      transition: background .15s;
+      transition: all .2s;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.02);
     }
-    .diff-btn:hover { background: rgba(245, 158, 11, 0.12); }
+    .diff-btn:hover { background: linear-gradient(145deg, #FFF8E6, #FFEFC2); border-style: solid; border-color: rgba(245, 158, 11, 0.5); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.06); }
+    .diff-btn:active { transform: translateY(0); }
     .diff-btn .count {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 18px; height: 18px; padding: 0 5px;
+      min-width: 20px; height: 20px; padding: 0 6px;
       background: #B45309; color: white;
-      border-radius: 999px; font-size: 10px; font-weight: 800;
+      border-radius: 999px; font-size: 11px; font-weight: 800;
     }
-    body.eve .diff-btn { background: rgba(245, 158, 11, 0.1); color: #FCD34D; border-color: rgba(252, 211, 77, 0.4); }
-    body.eve .diff-btn:hover { background: rgba(245, 158, 11, 0.18); }
+    body.eve .diff-btn { background: rgba(245, 158, 11, 0.05); color: #FCD34D; border-color: rgba(252, 211, 77, 0.2); box-shadow: none; }
+    body.eve .diff-btn:hover { background: rgba(245, 158, 11, 0.1); border-color: rgba(252, 211, 77, 0.4); }
 
     /* Modal : versets difficiles à marquer */
     .verse-chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px; margin: 4px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; margin: 4px;
       border-radius: 999px;
-      background: white;
-      border: 1.5px solid rgba(14,66,49,0.12);
-      font-size: 13px; font-weight: 600;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.06);
+      font-size: 14px; font-weight: 700;
       color: #1A1F2C;
       cursor: pointer; font-family: inherit;
       transition: all .2s;
+      box-shadow: 0 2px 6px rgba(14,66,49,0.02);
       font-variant-numeric: tabular-nums;
     }
-    .verse-chip:hover { border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.05); }
+    .verse-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(14,66,49,0.04); border-color: rgba(245, 158, 11, 0.3); }
     .verse-chip.marked {
       background: linear-gradient(135deg, #FEF3C7, #FDE68A);
       border-color: #F59E0B;
       color: #92400E;
-      box-shadow: 0 2px 6px rgba(245,158,11,0.2);
+      box-shadow: 0 4px 12px rgba(245,158,11,0.2);
     }
-    .verse-chip.marked::before { content: '⚠ '; }
+    .verse-chip.marked::before { content: '⚠ '; font-size: 11px; opacity: 0.8; }
+    body.eve .verse-chip { background: #142822; border-color: rgba(255,255,255,0.06); color: #E5F2EA; box-shadow: none; }
+    body.eve .verse-chip:hover { background: #1A3029; }
+    body.eve .verse-chip.marked { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #FCD34D; }
 
     .err-list-item {
       display: flex; align-items: center; justify-content: space-between;
@@ -557,26 +579,51 @@
     }
 
     /* ===== STATS : Comparaison hebdo / mensuelle ===== */
-    .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .week-card {
-      background: white;
-      border: 1px solid rgba(14,66,49,0.06);
-      border-radius: 12px;
-      padding: 12px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(14,66,49,0.03);
+      position: relative;
     }
-    .week-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(14,66,49,0.55); }
-    .week-value { font-size: 22px; font-weight: 800; color: #0E4231; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-    .week-value .denom { font-size: 14px; color: rgba(14,66,49,0.5); font-weight: 700; }
-    .week-pct { font-size: 11px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; }
-    .week-pct.good { color: #15803D; }
-    .week-pct.bad { color: #B91C1C; }
-    .week-pct.neutral { color: rgba(14,66,49,0.5); }
-    .week-trend { font-size: 10px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .week-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(14,66,49,0.5); margin-bottom: 8px; }
+    .week-main { display: flex; align-items: baseline; justify-content: space-between; }
+    .week-value { font-size: 28px; font-weight: 800; color: #0E4231; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+    .week-value .denom { font-size: 14px; color: rgba(14,66,49,0.4); font-weight: 700; margin-left: 2px; }
+    .week-pct { 
+      font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .week-pct.good { background: rgba(21,128,61,0.1); color: #15803D; }
+    .week-pct.bad { background: rgba(185,28,28,0.1); color: #B91C1C; }
+    .week-pct.neutral { background: rgba(14,66,49,0.06); color: rgba(14,66,49,0.6); }
+    .week-trend { 
+      font-size: 11px; font-weight: 600; margin-top: 10px; 
+      color: rgba(14,66,49,0.6); display: flex; align-items: center; gap: 4px;
+    }
     .week-trend.up { color: #15803D; }
     .week-trend.down { color: #B91C1C; }
-    .week-trend.flat { color: rgba(14,66,49,0.5); }
+    .week-trend.flat { color: rgba(14,66,49,0.4); }
+    body.eve .week-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); box-shadow: none; }
+    body.eve .week-label { color: rgba(255,255,255,0.5); }
+    body.eve .week-value { color: #E5F2EA; }
+    body.eve .week-value .denom { color: rgba(255,255,255,0.4); }
+    body.eve .week-pct.neutral { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
 
     /* ===== STATS : Liste par sourate ===== */
+    .mini-stat-card {
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 16px;
+      padding: 14px 12px;
+      box-shadow: 0 4px 12px rgba(14,66,49,0.02);
+      text-align: center;
+    }
+    body.eve .mini-stat-card {
+      background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.05); box-shadow: none;
+    }
     .surah-search {
       width: 100%; padding: 9px 12px;
       border: 1px solid rgba(14,66,49,0.12);
@@ -592,34 +639,40 @@
       background: white;
     }
     .surah-row {
-      display: grid; grid-template-columns: 22px 1fr 50px 38px 12px;
-      gap: 8px; align-items: center;
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(14,66,49,0.04);
-      font-size: 12px; cursor: pointer;
+      display: grid; grid-template-columns: 22px 1fr 54px 38px 12px;
+      gap: 10px; align-items: center;
+      padding: 12px 14px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 6px rgba(14,66,49,0.015);
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
     }
-    .surah-chev { font-size: 14px; color: rgba(14,66,49,0.35); text-align: right; line-height: 1; }
-    .surah-row:hover .surah-chev { color: rgba(14,66,49,0.7); }
-    .surah-row:last-child { border-bottom: none; }
-    .surah-row:active { background: rgba(14,66,49,0.02); }
-    .surah-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); font-variant-numeric: tabular-nums; }
+    .surah-row:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(14,66,49,0.04); }
+    .surah-chev { font-size: 14px; color: rgba(14,66,49,0.35); text-align: right; line-height: 1; transition: transform 0.2s; }
+    .surah-row:hover .surah-chev { color: rgba(14,66,49,0.7); transform: translateX(2px); }
+    .surah-row:last-child { margin-bottom: 0; }
+    .surah-row:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(14,66,49,0.02); }
+    .surah-num { font-size: 11px; font-weight: 800; color: rgba(14,66,49,0.5); font-variant-numeric: tabular-nums; }
     .surah-info { min-width: 0; }
-    .surah-name { font-weight: 700; color: #0E4231; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
-    .surah-verses { font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
-    .surah-verses .rem { color: #B45309; }
+    .surah-name { font-weight: 700; color: #0E4231; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; font-size: 14px; }
+    .surah-verses { font-size: 11px; color: rgba(14,66,49,0.55); font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
+    .surah-verses .rem { color: #B45309; font-weight: 700; }
     .surah-row.complete .surah-verses { color: #15573B; }
     .surah-row.complete .surah-name { color: #15573B; }
-    .surah-bar-wrap { height: 5px; background: rgba(14,66,49,0.06); border-radius: 999px; overflow: hidden; }
+    .surah-bar-wrap { height: 6px; background: rgba(14,66,49,0.05); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
     .surah-bar-fill { height: 100%; border-radius: 999px; transition: width .4s; }
     .surah-row.complete .surah-bar-fill { background: linear-gradient(90deg, #52A57A, #15573B); }
     .surah-row.half .surah-bar-fill     { background: linear-gradient(90deg, #7CC09B, #308A60); }
     .surah-row.partial .surah-bar-fill  { background: linear-gradient(90deg, #E6C36A, #B98947); }
-    .surah-row.empty .surah-bar-fill    { background: rgba(14,66,49,0.15); }
+    .surah-row.empty .surah-bar-fill    { background: rgba(14,66,49,0.12); }
     .surah-pct { font-size: 12px; font-weight: 800; color: rgba(14,66,49,0.7); font-variant-numeric: tabular-nums; text-align: right; }
-    .surah-row.complete .surah-pct { color: #15573B; }
+    .surah-row.complete .surah-pct { color: #15803D; }
     body.eve .surah-name { color: #E5F2EA; }
     body.eve .surah-verses { color: rgba(255,255,255,0.55); }
     body.eve .surah-verses .rem { color: #FCD34D; }
+    body.eve .surah-row { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); box-shadow: none; }
 
     /* ===== Achievements ===== */
     .ach-grid {
@@ -628,126 +681,133 @@
       gap: 6px;
     }
     .ach-card {
-      background: rgba(14,66,49,0.05);
-      border: 1px solid rgba(14,66,49,0.06);
-      border-radius: 12px;
-      padding: 10px 6px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 16px;
+      padding: 16px;
       text-align: center;
       opacity: 0.5;
-      filter: grayscale(0.6);
+      filter: grayscale(0.8);
       transition: all .3s;
       cursor: default;
+      box-shadow: 0 4px 12px rgba(14,66,49,0.03);
     }
     .ach-card.unlocked {
-      background: linear-gradient(135deg, #FAEDD0, #F1DA99);
+      background: linear-gradient(135deg, #FFFCF5, #F9EDCD);
       border-color: #E6C36A;
       opacity: 1;
       filter: none;
-      box-shadow: 0 2px 6px rgba(185,137,71,0.15);
+      box-shadow: 0 4px 16px rgba(185,137,71,0.2);
     }
-    .ach-icon { font-size: 22px; line-height: 1; }
-    .ach-label { font-size: 10px; font-weight: 800; color: #1A1F2C; margin-top: 5px; line-height: 1.15; }
+    .ach-icon { font-size: 26px; line-height: 1; }
+    .ach-label { font-size: 11px; font-weight: 800; color: #1A1F2C; margin-top: 8px; line-height: 1.2; }
     .ach-card.unlocked .ach-label { color: #6F4E22; }
-    .ach-desc { font-size: 9px; color: rgba(14,66,49,0.55); margin-top: 2px; font-weight: 600; line-height: 1.2; }
+    .ach-desc { font-size: 10px; color: rgba(14,66,49,0.6); margin-top: 4px; font-weight: 600; line-height: 1.3; }
     .ach-card.unlocked .ach-desc { color: #946930; }
-    body.eve .ach-card { background: rgba(255,255,255,0.05); }
-    body.eve .ach-card.unlocked { background: linear-gradient(135deg, #6F4E22, #946930); }
+    body.eve .ach-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); }
+    body.eve .ach-card.unlocked { background: linear-gradient(135deg, #6F4E22, #946930); border-color: #B98947; }
     body.eve .ach-card.unlocked .ach-label { color: #F8ECCC; }
     body.eve .ach-card.unlocked .ach-desc { color: rgba(248,236,204,0.75); }
 
     /* ===== Sourate detail modal ===== */
-    .sou-hero { text-align: center; padding: 8px 0 14px; border-bottom: 1px solid rgba(14,66,49,0.08); margin-bottom: 14px; }
+    .sou-hero { text-align: center; padding: 16px 20px; background: linear-gradient(145deg, #ffffff, #FAF6EC); border: 1px solid rgba(14,66,49,0.04); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(14,66,49,0.02); }
     .sou-name {
-      font-size: 24px; font-weight: 800; color: #073026;
-      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px;
+      font-size: 28px; font-weight: 800; color: #073026;
+      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px;
     }
     .sou-name.makkan { color: #946930; }
     .sou-name.medinan { color: #15573B; }
-    .sou-meta { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .sou-meta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .sou-progress {
-      font-size: 14px; font-weight: 700;
+      font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;
       color: #1A1F2C; font-variant-numeric: tabular-nums;
     }
-    .sou-progress .pct { color: rgba(14,66,49,0.65); font-weight: 700; margin-left: 6px; }
-    .sou-bar { height: 8px; background: rgba(14,66,49,0.08); border-radius: 999px; overflow: hidden; margin: 10px 36px 0; }
+    .sou-progress .pct { color: #15803D; background: rgba(48,138,96,0.1); padding: 2px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 1px solid rgba(48,138,96,0.15); }
+    .sou-bar { height: 8px; background: rgba(14,66,49,0.05); border-radius: 999px; overflow: hidden; margin: 14px 10px 0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
     .sou-bar-fill { height: 100%; background: linear-gradient(90deg, #52A57A, #15573B); border-radius: 999px; transition: width .5s; }
 
-    .sou-section-title { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(14,66,49,0.55); margin: 12px 0 8px; }
+    .sou-section-title { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(14,66,49,0.5); margin: 16px 0 12px; }
 
     .sou-month-head {
       display: flex; align-items: baseline; justify-content: space-between;
-      padding: 12px 10px 6px;
-      font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
-      text-transform: uppercase; color: rgba(14,66,49,0.55);
-      border-bottom: 1px solid rgba(14,66,49,0.08);
+      padding: 12px 6px 8px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(14,66,49,0.5);
+      border-bottom: 1px solid rgba(14,66,49,0.06); margin-bottom: 8px;
     }
     .sou-month-head .count {
-      font-size: 10px; letter-spacing: 0; text-transform: none;
-      color: rgba(14,66,49,0.5); font-weight: 700;
+      font-size: 11px; letter-spacing: 0; text-transform: none;
+      color: rgba(14,66,49,0.4); font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
     .sou-day {
       display: grid; grid-template-columns: 48px 56px 1fr auto;
-      gap: 8px; align-items: center;
-      padding: 9px 10px;
-      border-bottom: 1px solid rgba(14,66,49,0.04);
-      font-size: 12px;
-      cursor: pointer; font-variant-numeric: tabular-nums;
+      gap: 12px; align-items: center;
+      padding: 12px 14px;
+      background: white; border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 12px; margin-bottom: 8px;
+      font-size: 13px;
+      cursor: pointer; transition: all 0.2s; font-variant-numeric: tabular-nums;
     }
-    .sou-day:active { background: rgba(14,66,49,0.03); }
-    .sou-day-date { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.6); }
+    .sou-day:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(14,66,49,0.03); }
+    .sou-day:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(14,66,49,0.02); }
+    .sou-day-date { font-size: 11px; font-weight: 800; color: rgba(14,66,49,0.5); }
     .sou-day-page { font-weight: 800; color: #0E4231; }
-    .sou-day-verses { font-size: 11px; color: rgba(14,66,49,0.7); font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sou-day-verses { font-size: 11px; color: rgba(14,66,49,0.6); font-weight: 700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .sou-day-mark { font-size: 14px; color: rgba(14,66,49,0.3); }
     .sou-day-mark.done { color: #15803D; }
     .sou-day-mark.partial { color: #B98947; }
-    .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.12), transparent); }
+    .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.08), rgba(48,138,96,0.02)); border-color: rgba(48,138,96,0.15); }
+    body.eve .sou-hero { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); box-shadow: none; }
+    body.eve .sou-progress .pct { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-color: transparent; }
+    body.eve .sou-day { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); }
+    body.eve .sou-day:hover { background: rgba(255,255,255,0.04); box-shadow: none; }
     body.eve .sou-month-head { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.1); }
-    body.eve .sou-day-date { color: rgba(255,255,255,0.65); }
+    body.eve .sou-day-date { color: rgba(255,255,255,0.5); }
     body.eve .sou-name { color: #FCF7EB; }
     body.eve .sou-day-page { color: #E5F2EA; }
     body.eve .sou-day-verses { color: rgba(255,255,255,0.65); }
 
     .sou-err-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 5px 10px; margin: 3px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; margin: 4px;
       border-radius: 999px;
-      background: rgba(245, 158, 11, 0.15);
-      color: #92400E;
-      font-size: 12px; font-weight: 700;
+      background: rgba(245, 158, 11, 0.12);
+      color: #92400E; border: 1px solid rgba(245, 158, 11, 0.2);
+      font-size: 13px; font-weight: 800;
       font-variant-numeric: tabular-nums;
     }
-    .sou-err-empty { font-size: 12px; color: rgba(14,66,49,0.5); font-style: italic; padding: 6px 0; }
+    body.eve .sou-err-chip { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.25); color: #FCD34D; }
+    .sou-err-empty { font-size: 13px; color: rgba(14,66,49,0.5); font-weight: 600; font-style: italic; padding: 10px 0; }
 
     /* ===== Heatmap 365 jours ===== */
-    .heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 12px; background: rgba(14,66,49,0.02); border-radius: 12px; border: 1px solid rgba(14,66,49,0.04); }
     .heatmap {
       display: grid;
       grid-template-rows: repeat(7, 1fr);
       grid-auto-flow: column;
-      grid-auto-columns: 1fr;
-      gap: 2px;
-      min-width: 100%;
+      gap: 3px;
+      width: max-content;
     }
     .heatmap-cell {
-      aspect-ratio: 1;
-      border-radius: 2px;
-      background: rgba(14, 66, 49, 0.07);
-      min-width: 7px;
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      background: rgba(14, 66, 49, 0.08);
       cursor: pointer;
-      transition: transform .12s;
+      transition: all 0.2s;
     }
-    .heatmap-cell:hover { transform: scale(1.4); border-radius: 1px; }
+    .heatmap-cell:hover { transform: scale(1.4); border-radius: 2px; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .heatmap-cell.done    { background: linear-gradient(135deg, #52A57A, #15573B); }
     .heatmap-cell.partial { background: linear-gradient(135deg, #E6C36A, #B98947); }
-    .heatmap-cell.future  { background: rgba(14, 66, 49, 0.04); opacity: 0.5; cursor: default; }
-    .heatmap-cell.current { box-shadow: 0 0 0 1.5px #1E3A5F; z-index: 1; }
-    .heatmap-legend { display: flex; align-items: center; gap: 6px; font-size: 10px; color: rgba(14,66,49,0.5); font-weight: 600; margin-top: 8px; }
-    .heatmap-legend .hm-l { display: flex; align-items: center; gap: 4px; }
-    .heatmap-legend .hm-l span { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+    .heatmap-cell.future  { background: rgba(14, 66, 49, 0.03); opacity: 0.5; cursor: default; }
+    .heatmap-cell.current { box-shadow: 0 0 0 1.5px rgba(255,255,255,0.8), 0 0 0 3px #1E3A5F; z-index: 1; }
+    .heatmap-legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(14,66,49,0.6); font-weight: 600; margin-top: 10px; justify-content: flex-end; }
+    .heatmap-legend .hm-l { display: flex; align-items: center; gap: 5px; }
+    .heatmap-legend .hm-l span { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    body.eve .heatmap-wrap { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
     body.eve .heatmap-cell { background: rgba(255,255,255,0.07); }
-    body.eve .heatmap-cell.future { background: rgba(255,255,255,0.03); }
-    body.eve .heatmap-cell.current { box-shadow: 0 0 0 1.5px #7CC09B; }
+    body.eve .heatmap-cell.future { background: rgba(255,255,255,0.02); }
+    body.eve .heatmap-cell.current { box-shadow: 0 0 0 1.5px rgba(0,0,0,0.5), 0 0 0 3px #7CC09B; }
     body.eve .heatmap-legend { color: rgba(255,255,255,0.5); }
 
     /* ===== Reminder banner (intra-app) ===== */
@@ -800,27 +860,28 @@
     /* Task cards (gros, tappables) */
     .today-tasks { margin-top: 18px; flex: 1; }
     .tcard {
-      background: white;
-      border: 1.5px solid rgba(14,66,49,0.07);
-      border-radius: 18px;
-      padding: 22px 20px 20px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.04);
+      border-radius: 20px;
+      padding: 24px 22px 22px;
       margin-bottom: 16px;
       cursor: pointer;
-      transition: transform .15s, border-color .25s, background .35s, box-shadow .25s;
+      transition: all .3s;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 2px 4px rgba(14,66,49,0.03), 0 8px 16px rgba(14,66,49,0.03), 0 16px 32px rgba(14,66,49,0.03);
+      box-shadow: 0 4px 16px rgba(14,66,49,0.04);
     }
+    .tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,66,49,0.06); }
     .tcard:active { transform: scale(0.985); }
     .tcard.done {
       background: linear-gradient(135deg, #EEF7F1, #D6ECDF);
       border-color: rgba(48,138,96,0.35);
-      box-shadow: 0 4px 8px rgba(48,138,96,0.06), 0 12px 24px rgba(48,138,96,0.08);
+      box-shadow: 0 4px 16px rgba(48,138,96,0.08);
     }
-    .tcard-head { display: flex; align-items: center; gap: 14px; }
+    .tcard-head { display: flex; align-items: center; gap: 16px; }
     .tcard-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: rgba(48,138,96,0.12); color: #15573B;
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(48,138,96,0.08); color: #15573B;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: all .35s;
     }
@@ -842,7 +903,7 @@
     }
     .tcard-check {
       width: 32px; height: 32px; border-radius: 50%;
-      border: 2.5px solid rgba(14,66,49,0.18);
+      border: 2px solid rgba(14,66,49,0.12);
       background: white;
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
@@ -859,31 +920,33 @@
     /* Day navigation footer */
     .day-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(250, 246, 236, 0.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-top: 1px solid rgba(14,66,49,0.08);
-      padding: 10px 18px;
+      background: rgba(250, 246, 236, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(14,66,49,0.05);
+      padding: 12px 18px;
       z-index: 30;
+      box-shadow: 0 -4px 20px rgba(14,66,49,0.02);
     }
     .day-nav-inner {
       max-width: 540px; margin: 0 auto;
       display: grid; grid-template-columns: 1fr auto 1fr;
-      gap: 10px; align-items: center;
+      gap: 12px; align-items: center;
     }
     .day-nav-btn {
-      padding: 11px 14px;
-      background: white;
-      border: 1px solid rgba(14,66,49,0.1);
-      border-radius: 14px;
-      font-size: 13px; font-weight: 700;
+      padding: 14px 20px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.06);
+      border-radius: 16px;
+      font-size: 14px; font-weight: 800;
       color: #0E4231;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       cursor: pointer; font-family: inherit;
-      transition: all .15s;
+      transition: all .2s;
+      box-shadow: 0 2px 8px rgba(14,66,49,0.03);
     }
-    .day-nav-btn:hover { background: rgba(48,138,96,0.04); border-color: rgba(48,138,96,0.2); }
-    .day-nav-btn:active { transform: scale(0.97); }
+    .day-nav-btn:hover { background: linear-gradient(145deg, #FDFDFD, #F1EAD7); box-shadow: 0 4px 12px rgba(14,66,49,0.05); transform: translateY(-1px); border-color: rgba(14,66,49,0.1); }
+    .day-nav-btn:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(14,66,49,0.02); }
     .day-nav-btn.locked { opacity: 0.4; cursor: not-allowed; }
     .day-nav-center {
       font-size: 11px; font-weight: 800;
@@ -902,23 +965,27 @@
       margin-top: 14px;
       background: white;
       border: 1px solid rgba(14,66,49,0.07);
-      border-radius: 14px;
-      padding: 12px 14px;
+      margin-top: 16px;
+      background: linear-gradient(145deg, #ffffff, #FAF6EC);
+      border: 1px solid rgba(14,66,49,0.05);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(14,66,49,0.02);
+      transition: all 0.3s;
     }
+    .today-notes:focus-within { box-shadow: 0 4px 20px rgba(14,66,49,0.06); border-color: rgba(14,66,49,0.1); }
     .today-notes-label {
-      font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
-      text-transform: uppercase; color: rgba(14,66,49,0.5);
-      margin-bottom: 4px;
+      font-size: 11px; font-weight: 800; color: rgba(14,66,49,0.5);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 8px;
     }
     .today-notes textarea {
-      width: 100%; border: none; outline: none;
-      background: transparent;
-      font-size: 13px; font-weight: 500; color: #1A1F2C;
-      font-family: inherit; resize: none;
-      min-height: 32px;
-      line-height: 1.4;
+      width: 100%; border: none; background: transparent;
+      resize: none; font-size: 15px; font-weight: 500;
+      color: #0E4231; line-height: 1.5; font-family: inherit;
     }
-    .today-notes textarea::placeholder { color: rgba(14,66,49,0.35); font-style: italic; }
+    .today-notes textarea:focus { outline: none; }
+    .today-notes textarea::placeholder { color: rgba(14,66,49,0.35); font-style: italic; font-weight: 400; }
 
     /* Celebration overlay */
     .celebration {
@@ -1159,7 +1226,7 @@
       </div>
       <div class="sou-section-title">Versets difficiles <span id="sou-err-count" style="float:right; color:#92400E; letter-spacing:0; text-transform:none;">0</span></div>
       <div id="sou-errs"></div>
-      <div class="sou-section-title">Jours qui contiennent cette sourate <span id="sou-days-count" style="float:right; color:rgba(14,66,49,0.6); letter-spacing:0; text-transform:none;">0</span></div>
+      <div class="sou-section-title">Jours qui contiennent cette sourate <span style="float:right; color:rgba(14,66,49,0.6); letter-spacing:0; text-transform:none;"><span id="sou-months-count">0</span> mois • <span id="sou-days-count">0</span> jours</span></div>
       <div id="sou-days-list"></div>
     </div>
   </div>
@@ -1245,20 +1312,20 @@
 
       <!-- ============ STATS CLASSIQUES ============ -->
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <div class="modal-card" style="margin: 0;">
-          <div class="field-label" style="margin: 0;">Pages</div>
-          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #0E4231; margin-top: 4px;" id="stats-pages">0</div>
-          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">/ 604</div>
+        <div class="mini-stat-card">
+          <div class="field-label" style="margin: 0; font-size: 11px;">Pages</div>
+          <div class="tabular" style="font-size: 24px; font-weight: 800; color: #0E4231; margin-top: 4px; line-height: 1;" id="stats-pages">0</div>
+          <div style="font-size: 11px; color: rgba(14,66,49,0.4); font-weight: 700; margin-top: 2px;">/ 604</div>
         </div>
-        <div class="modal-card" style="margin: 0;">
-          <div class="field-label" style="margin: 0;">Tours</div>
-          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #0E4231; margin-top: 4px;" id="stats-tours">0</div>
-          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">/ 196</div>
+        <div class="mini-stat-card">
+          <div class="field-label" style="margin: 0; font-size: 11px;">Tours</div>
+          <div class="tabular" style="font-size: 24px; font-weight: 800; color: #0E4231; margin-top: 4px; line-height: 1;" id="stats-tours">0</div>
+          <div style="font-size: 11px; color: rgba(14,66,49,0.4); font-weight: 700; margin-top: 2px;">/ 196</div>
         </div>
-        <div class="modal-card" style="margin: 0;">
-          <div class="field-label" style="margin: 0;">Série 🔥</div>
-          <div class="tabular" style="font-size: 20px; font-weight: 800; color: #B98947; margin-top: 4px;" id="stats-streak">0</div>
-          <div style="font-size: 10px; color: rgba(14,66,49,0.55); font-weight: 600;">d'affilée</div>
+        <div class="mini-stat-card">
+          <div class="field-label" style="margin: 0; font-size: 11px;">Série 🔥</div>
+          <div class="tabular" style="font-size: 24px; font-weight: 800; color: #B98947; margin-top: 4px; line-height: 1;" id="stats-streak">0</div>
+          <div style="font-size: 11px; color: rgba(14,66,49,0.4); font-weight: 700; margin-top: 2px;">Jours</div>
         </div>
       </div>
 
@@ -1273,14 +1340,18 @@
         <div class="week-grid">
           <div class="week-card">
             <div class="week-label">7 derniers jours</div>
-            <div class="week-value tabular"><span id="wk-this">0</span><span class="denom"> / 7</span></div>
-            <div class="week-pct neutral" id="wk-this-pct">0%</div>
+            <div class="week-main">
+              <div class="week-value tabular"><span id="wk-this">0</span><span class="denom">/7</span></div>
+              <div class="week-pct neutral" id="wk-this-pct">0%</div>
+            </div>
             <div class="week-trend flat" id="wk-this-trend">—</div>
           </div>
           <div class="week-card">
             <div class="week-label">30 derniers jours</div>
-            <div class="week-value tabular"><span id="m-this">0</span><span class="denom"> / 30</span></div>
-            <div class="week-pct neutral" id="m-this-pct">0%</div>
+            <div class="week-main">
+              <div class="week-value tabular"><span id="m-this">0</span><span class="denom">/30</span></div>
+              <div class="week-pct neutral" id="m-this-pct">0%</div>
+            </div>
             <div class="week-trend flat" id="m-this-trend">—</div>
           </div>
         </div>
@@ -2483,22 +2554,22 @@
 
   function renderBreakdown(b) {
     const max = Math.max(1, b.complete, b.partial, b.empty);
-    const pct = n => Math.round((n / b.total) * 100);
+    const pct = n => b.total > 0 ? Math.round((n / b.total) * 100) : 0;
     const bar = (n, color) => '<div class="breakdown-bar"><div style="width:' + Math.round(n/max*100) + '%; background:' + color + ';"></div></div>';
     return '<div class="breakdown-row">' +
         '<span class="breakdown-dot complete"></span>' +
-        '<span class="breakdown-label">Complets' + bar(b.complete, 'linear-gradient(90deg,#52A57A,#15573B)') + '</span>' +
-        '<span class="breakdown-count">' + b.complete + '<span class="pct">' + pct(b.complete) + '%</span></span>' +
+        '<div class="breakdown-label">Complets' + bar(b.complete, 'linear-gradient(90deg,#52A57A,#15573B)') + '</div>' +
+        '<div class="breakdown-count">' + b.complete + '<span class="pct">' + pct(b.complete) + '%</span></div>' +
       '</div>' +
       '<div class="breakdown-row">' +
         '<span class="breakdown-dot partial"></span>' +
-        '<span class="breakdown-label">Partiels' + bar(b.partial, 'linear-gradient(90deg,#D4A574,#B98947)') + '</span>' +
-        '<span class="breakdown-count">' + b.partial + '<span class="pct">' + pct(b.partial) + '%</span></span>' +
+        '<div class="breakdown-label">Partiels' + bar(b.partial, 'linear-gradient(90deg,#D4A574,#B98947)') + '</div>' +
+        '<div class="breakdown-count">' + b.partial + '<span class="pct">' + pct(b.partial) + '%</span></div>' +
       '</div>' +
       '<div class="breakdown-row">' +
         '<span class="breakdown-dot empty"></span>' +
-        '<span class="breakdown-label">Rien' + bar(b.empty, 'rgba(14,66,49,0.3)') + '</span>' +
-        '<span class="breakdown-count">' + b.empty + '<span class="pct">' + pct(b.empty) + '%</span></span>' +
+        '<div class="breakdown-label">Rien' + bar(b.empty, 'rgba(14,66,49,0.2)') + '</div>' +
+        '<div class="breakdown-count">' + b.empty + '<span class="pct">' + pct(b.empty) + '%</span></div>' +
       '</div>';
   }
 
@@ -2813,6 +2884,8 @@
     const startTime = sd ? new Date(sd + 'T00:00:00').getTime() : null;
     const hasDate = startTime && !isNaN(startTime);
     const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    document.getElementById('sou-months-count').style.display = hasDate ? 'inline' : 'none';
+    document.getElementById('sou-months-count').nextSibling.textContent = hasDate ? ' mois • ' : '';
 
     function renderDayRow(item) {
       const dd = item.day, isDone = isDayComplete(dd.day), isPart = !isDone && isDayPartial(dd.day);
@@ -2845,6 +2918,7 @@
         if (!groups[key]) { groups[key] = []; order.push(key); }
         groups[key].push(item);
       });
+      document.getElementById('sou-months-count').textContent = order.length;
       let html = '';
       order.forEach(k => {
         const [y, m] = k.split('-');
@@ -2856,6 +2930,7 @@
       });
       daysListEl.innerHTML = html;
     } else {
+      document.getElementById('sou-months-count').textContent = '0';
       daysListEl.innerHTML = days.map(renderDayRow).join('');
     }
 
@@ -2943,11 +3018,11 @@
       const done = jd.filter(d => isDayComplete(d.day)).length;
       const pct = total ? Math.round((done / total) * 100) : 0;
       if (pct >= 100) juzDone++;
-      let bg = 'background: rgba(14,66,49,0.05); color: rgba(14,66,49,0.5);';
-      if (pct >= 100) bg = 'background: linear-gradient(135deg, #308A60, #15573B); color: white;';
-      else if (pct >= 50) bg = 'background: rgba(48,138,96,0.18); color: #15573B;';
-      else if (pct > 0) bg = 'background: rgba(212,165,116,0.2); color: #946930;';
-      html += '<div style="padding: 6px 4px; text-align: center; border-radius: 8px; ' + bg + '"><div class="tabular" style="font-size: 11px; font-weight: 800;">' + juz + '</div><div class="tabular" style="font-size: 9px; font-weight: 700; opacity: 0.85;">' + pct + '%</div></div>';
+      let bg = 'background: rgba(14,66,49,0.03); border: 1px solid rgba(14,66,49,0.05); color: rgba(14,66,49,0.5);';
+      if (pct >= 100) bg = 'background: linear-gradient(135deg, #308A60, #15573B); color: white; box-shadow: 0 2px 6px rgba(21,87,59,0.2);';
+      else if (pct >= 50) bg = 'background: linear-gradient(135deg, #E6F3EC, #C8E6D6); border: 1px solid rgba(48,138,96,0.15); color: #15573B;';
+      else if (pct > 0) bg = 'background: linear-gradient(135deg, #FCF5EB, #F2E3C6); border: 1px solid rgba(212,165,116,0.2); color: #946930;';
+      html += '<div style="padding: 10px 4px; text-align: center; border-radius: 12px; transition: all 0.3s; ' + bg + '"><div class="tabular" style="font-size: 13px; font-weight: 800; line-height: 1;">' + juz + '</div><div class="tabular" style="font-size: 10px; font-weight: 700; opacity: 0.85; margin-top: 4px;">' + pct + '%</div></div>';
     }
     grid.innerHTML = html;
     const sum = document.getElementById('juz-summary');

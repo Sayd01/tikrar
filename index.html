@@ -1577,11 +1577,13 @@
   function getApplicableTasks(d) {
     if (!d) return [];
     if (d.isClosing) {
+      const verses = fmtRangeText(getRangeVerses(d.revisionStartDay, d.revisionEndDay));
+      const pageStr = formatPageRange(d.revisionStartDay, d.revisionEndDay);
       return [{
         id: 'closing',
-        label: 'Clôture',
-        content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
-        extra: 'Clôture ' + d.closingTour + ' / 30 · Jour ' + d.closingDay + ' / 6',
+        label: 'Clôture (ختمة)',
+        content: verses || pageStr,
+        extra: 'Clôture ' + d.closingTour + '/30 · Jour ' + d.closingDay + '/6 · ' + pageStr,
         icon: ICONS.closing
       }];
     }

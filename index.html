@@ -618,6 +618,90 @@
     body.eve .surah-verses { color: rgba(255,255,255,0.55); }
     body.eve .surah-verses .rem { color: #FCD34D; }
 
+    /* ===== Achievements ===== */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .ach-card {
+      background: rgba(14,66,49,0.05);
+      border: 1px solid rgba(14,66,49,0.06);
+      border-radius: 12px;
+      padding: 10px 6px;
+      text-align: center;
+      opacity: 0.5;
+      filter: grayscale(0.6);
+      transition: all .3s;
+      cursor: default;
+    }
+    .ach-card.unlocked {
+      background: linear-gradient(135deg, #FAEDD0, #F1DA99);
+      border-color: #E6C36A;
+      opacity: 1;
+      filter: none;
+      box-shadow: 0 2px 6px rgba(185,137,71,0.15);
+    }
+    .ach-icon { font-size: 22px; line-height: 1; }
+    .ach-label { font-size: 10px; font-weight: 800; color: #1A1F2C; margin-top: 5px; line-height: 1.15; }
+    .ach-card.unlocked .ach-label { color: #6F4E22; }
+    .ach-desc { font-size: 9px; color: rgba(14,66,49,0.55); margin-top: 2px; font-weight: 600; line-height: 1.2; }
+    .ach-card.unlocked .ach-desc { color: #946930; }
+    body.eve .ach-card { background: rgba(255,255,255,0.05); }
+    body.eve .ach-card.unlocked { background: linear-gradient(135deg, #6F4E22, #946930); }
+    body.eve .ach-card.unlocked .ach-label { color: #F8ECCC; }
+    body.eve .ach-card.unlocked .ach-desc { color: rgba(248,236,204,0.75); }
+
+    /* ===== Sourate detail modal ===== */
+    .sou-hero { text-align: center; padding: 8px 0 14px; border-bottom: 1px solid rgba(14,66,49,0.08); margin-bottom: 14px; }
+    .sou-name {
+      font-size: 24px; font-weight: 800; color: #073026;
+      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px;
+    }
+    .sou-name.makkan { color: #946930; }
+    .sou-name.medinan { color: #15573B; }
+    .sou-meta { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .sou-progress {
+      font-size: 14px; font-weight: 700;
+      color: #1A1F2C; font-variant-numeric: tabular-nums;
+    }
+    .sou-progress .pct { color: rgba(14,66,49,0.65); font-weight: 700; margin-left: 6px; }
+    .sou-bar { height: 8px; background: rgba(14,66,49,0.08); border-radius: 999px; overflow: hidden; margin: 10px 36px 0; }
+    .sou-bar-fill { height: 100%; background: linear-gradient(90deg, #52A57A, #15573B); border-radius: 999px; transition: width .5s; }
+
+    .sou-section-title { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(14,66,49,0.55); margin: 12px 0 8px; }
+
+    .sou-day {
+      display: grid; grid-template-columns: 38px 64px 1fr auto;
+      gap: 8px; align-items: center;
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(14,66,49,0.04);
+      font-size: 12px;
+      cursor: pointer; font-variant-numeric: tabular-nums;
+    }
+    .sou-day:active { background: rgba(14,66,49,0.03); }
+    .sou-day-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); }
+    .sou-day-page { font-weight: 800; color: #0E4231; }
+    .sou-day-verses { font-size: 11px; color: rgba(14,66,49,0.7); font-weight: 600; }
+    .sou-day-mark { font-size: 14px; color: rgba(14,66,49,0.3); }
+    .sou-day-mark.done { color: #15803D; }
+    .sou-day-mark.partial { color: #B98947; }
+    .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.12), transparent); }
+    body.eve .sou-name { color: #FCF7EB; }
+    body.eve .sou-day-page { color: #E5F2EA; }
+    body.eve .sou-day-verses { color: rgba(255,255,255,0.65); }
+
+    .sou-err-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; margin: 3px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.15);
+      color: #92400E;
+      font-size: 12px; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .sou-err-empty { font-size: 12px; color: rgba(14,66,49,0.5); font-style: italic; padding: 6px 0; }
+
     /* ===== Heatmap 365 jours ===== */
     .heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .heatmap {
@@ -1042,6 +1126,23 @@
     </div>
   </div>
 
+  <!-- ============ MODAL : détail d'une sourate ============ -->
+  <div id="modal-sourate" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-sourate')">
+    <div class="modal-sheet">
+      <h2 class="modal-title" style="font-size:14px; opacity:0.6; margin-bottom: 4px;">Sourate</h2>
+      <div class="sou-hero">
+        <div class="sou-name" id="sou-name">—</div>
+        <div class="sou-meta" id="sou-meta"></div>
+        <div class="sou-progress"><span id="sou-done">0</span> / <span id="sou-total">0</span> versets <span class="pct" id="sou-pct">0%</span></div>
+        <div class="sou-bar"><div class="sou-bar-fill" id="sou-bar-fill" style="width:0%"></div></div>
+      </div>
+      <div class="sou-section-title">Versets difficiles <span id="sou-err-count" style="float:right; color:#92400E; letter-spacing:0; text-transform:none;">0</span></div>
+      <div id="sou-errs"></div>
+      <div class="sou-section-title">Jours qui contiennent cette sourate <span id="sou-days-count" style="float:right; color:rgba(14,66,49,0.6); letter-spacing:0; text-transform:none;">0</span></div>
+      <div id="sou-days-list"></div>
+    </div>
+  </div>
+
   <!-- ============ MODAL : liste de tous les versets difficiles (depuis Settings) ============ -->
   <div id="modal-errors" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-errors')">
     <div class="modal-sheet">
@@ -1081,6 +1182,12 @@
           </div>
         </div>
         <div id="stats-eta" style="font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.72); margin-top: 16px; display: none;"></div>
+      </div>
+
+      <!-- ============ Achievements / Badges ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 10px;">Achievements <span id="ach-summary" style="float:right; color:rgba(14,66,49,0.6); text-transform:none; letter-spacing:0; font-variant-numeric:tabular-nums; font-weight:700;">0 / 0</span></div>
+        <div class="ach-grid" id="ach-grid"></div>
       </div>
 
       <!-- ============ Heatmap 365 derniers jours ============ -->
@@ -2172,6 +2279,7 @@
     renderSurahList('');
     renderHeatmap();
     renderETA();
+    renderAchievements();
     document.getElementById('surah-search').value = '';
     document.getElementById('modal-stats').classList.add('open');
   }
@@ -2500,12 +2608,8 @@
   }
 
   function jumpToSurah(surahNum) {
-    // Aller au 1er jour qui contient cette sourate
-    const target = programData.find(d => !d.isClosing && d.sourate === SURAH_NAMES[surahNum - 1]);
-    if (!target) return;
-    closeModal('modal-stats');
-    setActiveDay(target.day);
-    showToast(SURAH_NAMES[surahNum - 1]);
+    // Au lieu de jumper directement, ouvrir la fiche détaillée
+    openSourate(surahNum);
   }
 
   // ===== G5 : Recherche / jump dans le carnet =====
@@ -2554,6 +2658,149 @@
     } else {
       showToast('Pas de résultat pour « ' + val + ' »');
     }
+  }
+
+  // ===== ACHIEVEMENTS =====
+  function countDaysComplete() {
+    let n = 0;
+    for (let d = 1; d <= TOTAL_DAYS; d++) if (isDayComplete(d)) n++;
+    return n;
+  }
+  function isJuzComplete(juz) {
+    const days = programData.filter(d => !d.isClosing && d.juz === juz);
+    return days.length > 0 && days.every(d => isDayComplete(d.day));
+  }
+  function countJuzComplete() {
+    let n = 0;
+    for (let j = 1; j <= 30; j++) if (isJuzComplete(j)) n++;
+    return n;
+  }
+  function isSurahComplete(num) {
+    const s = calculateSurahStats()[num];
+    return s && s.total > 0 && s.done >= s.total;
+  }
+  function hasAnyTaskDone(taskId) {
+    for (const day in progress) if (progress[day] && progress[day][taskId] === true) return true;
+    return false;
+  }
+
+  const ACHIEVEMENTS = [
+    { id: 'first',       icon: '🌱', label: 'Premier pas',   desc: '1ʳᵉ tâche validée',     check: () => Object.keys(progress).length > 0 },
+    { id: 'streak-7',    icon: '🔥', label: 'Semaine',       desc: '7 jours d\'affilée',    check: () => calculateStreak() >= 7 },
+    { id: 'streak-30',   icon: '🔥', label: 'Mois',          desc: '30 jours d\'affilée',   check: () => calculateStreak() >= 30 },
+    { id: 'streak-100',  icon: '💎', label: 'Centurion',     desc: '100 jours d\'affilée',  check: () => calculateStreak() >= 100 },
+    { id: 'streak-365',  icon: '🏆', label: 'Annéaire',      desc: '365 jours d\'affilée',  check: () => calculateStreak() >= 365 },
+    { id: 'days-50',     icon: '⭐', label: '50 jours',       desc: '50 jours validés',     check: () => countDaysComplete() >= 50 },
+    { id: 'days-200',    icon: '🌟', label: '200 jours',      desc: '200 jours validés',    check: () => countDaysComplete() >= 200 },
+    { id: 'days-1000',   icon: '💫', label: '1000 jours',     desc: '1000 jours validés',   check: () => countDaysComplete() >= 1000 },
+    { id: 'juz-1',       icon: '📖', label: '1ᵉʳ Juz',        desc: 'Juz 1 maîtrisé',       check: () => isJuzComplete(1) },
+    { id: 'juz-5',       icon: '📖', label: '5 Juz',          desc: '5 juz maîtrisés',      check: () => countJuzComplete() >= 5 },
+    { id: 'juz-15',      icon: '📚', label: 'Demi-Coran',     desc: '15 juz (½)',           check: () => countJuzComplete() >= 15 },
+    { id: 'juz-30',      icon: '🏅', label: 'Coran complet',  desc: '30 juz maîtrisés',     check: () => countJuzComplete() >= 30 },
+    { id: 'sou-1',       icon: '☪︎',  label: 'Al-Fatihah',    desc: 'L\'Ouverture',          check: () => isSurahComplete(1) },
+    { id: 'sou-36',      icon: '💚', label: 'Yaa-Sin',        desc: 'Cœur du Coran',         check: () => isSurahComplete(36) },
+    { id: 'sou-55',      icon: '🌹', label: 'Ar-Rahman',      desc: 'Le Miséricordieux',     check: () => isSurahComplete(55) },
+    { id: 'sou-67',      icon: '🛡', label: 'Al-Mulk',        desc: 'La Souveraineté',       check: () => isSurahComplete(67) },
+    { id: 'liaison',     icon: '🔗', label: '1ʳᵉ liaison',    desc: 'Liaison validée',       check: () => hasAnyTaskDone('liaison') },
+    { id: 'revision',    icon: '🔄', label: '1ʳᵉ révision',   desc: 'Murajaa validée',       check: () => hasAnyTaskDone('revision') },
+    { id: 'closing',     icon: '☪️', label: 'Phase clôture',  desc: 'Mémo terminée',        check: () => countDaysComplete() >= TOTAL_MEMO },
+    { id: 'khatma',      icon: '🌙', label: 'Khatma',         desc: 'Programme complet',     check: () => countDaysComplete() >= TOTAL_DAYS }
+  ];
+
+  function renderAchievements() {
+    const dates = JSON.parse(localStorage.getItem('tikrar:achievements') || '{}');
+    let unlocked = 0;
+    let newlyUnlocked = [];
+    const html = ACHIEVEMENTS.map(a => {
+      const isOn = a.check();
+      if (isOn && !dates[a.id]) {
+        dates[a.id] = new Date().toISOString();
+        newlyUnlocked.push(a);
+      }
+      if (isOn) unlocked++;
+      return '<div class="ach-card' + (isOn ? ' unlocked' : '') + '" title="' + a.desc + '">' +
+        '<div class="ach-icon">' + a.icon + '</div>' +
+        '<div class="ach-label">' + a.label + '</div>' +
+        '<div class="ach-desc">' + a.desc + '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('ach-grid').innerHTML = html;
+    document.getElementById('ach-summary').textContent = unlocked + ' / ' + ACHIEVEMENTS.length;
+    localStorage.setItem('tikrar:achievements', JSON.stringify(dates));
+    // Notif si nouveaux unlocked
+    if (newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach((a, i) => setTimeout(() => showToast(a.icon + ' ' + a.label + ' débloqué !'), 800 + i * 1200));
+    }
+  }
+
+  // ===== SOURATE DETAIL (vue inversée) =====
+  function getDaysForSurah(surahNum) {
+    const days = [];
+    programData.forEach(d => {
+      if (d.isClosing) return;
+      const verses = getVersesForTask(d.mushafPage, d.part);
+      if (!verses) return;
+      const containingChunks = verses.filter(c => c.s === surahNum);
+      if (containingChunks.length === 0) return;
+      days.push({ day: d, chunks: containingChunks });
+    });
+    return days;
+  }
+
+  function openSourate(surahNum) {
+    const name = SURAH_NAMES[surahNum - 1];
+    const stats = calculateSurahStats()[surahNum];
+    const days = getDaysForSurah(surahNum);
+    const surahErrs = Object.keys(errors).filter(k => parseInt(k.split(':')[0]) === surahNum).sort((a,b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
+
+    // Détermine Mecque/Médine du premier jour qui contient cette sourate
+    const sampleDay = days[0] && days[0].day;
+    const isMakkan = sampleDay && sampleDay.revelation === 'makkan';
+    const revLabel = isMakkan ? 'Mecque' : 'Médine';
+
+    document.getElementById('sou-name').textContent = name;
+    document.getElementById('sou-name').className = 'sou-name ' + (isMakkan ? 'makkan' : 'medinan');
+    document.getElementById('sou-meta').innerHTML =
+      '<span class="pill ' + (isMakkan ? 'makkan' : 'medinan') + '">' + revLabel + '</span>' +
+      '<span class="pill juz">' + stats.total + ' versets</span>';
+
+    document.getElementById('sou-done').textContent = stats.done;
+    document.getElementById('sou-total').textContent = stats.total;
+    const pct = stats.total > 0 ? Math.round(stats.done / stats.total * 100) : 0;
+    document.getElementById('sou-pct').textContent = pct + '%';
+    document.getElementById('sou-bar-fill').style.width = pct + '%';
+
+    // Versets difficiles
+    const errEl = document.getElementById('sou-errs');
+    const errCountEl = document.getElementById('sou-err-count');
+    errCountEl.textContent = surahErrs.length;
+    if (surahErrs.length === 0) {
+      errEl.innerHTML = '<div class="sou-err-empty">Aucun verset marqué comme difficile.</div>';
+    } else {
+      errEl.innerHTML = surahErrs.map(k => {
+        const a = k.split(':')[1];
+        return '<span class="sou-err-chip">⚠ v' + a + '</span>';
+      }).join('');
+    }
+
+    // Liste des jours
+    const daysListEl = document.getElementById('sou-days-list');
+    document.getElementById('sou-days-count').textContent = days.length;
+    daysListEl.innerHTML = days.map(item => {
+      const dd = item.day, isDone = isDayComplete(dd.day), isPart = !isDone && isDayPartial(dd.day);
+      const mark = isDone ? '<span class="sou-day-mark done">✓</span>' : isPart ? '<span class="sou-day-mark partial">◐</span>' : '<span class="sou-day-mark">○</span>';
+      const versesStr = item.chunks.map(c => 'v' + (c.f === c.t ? c.f : c.f + '-' + c.t)).join(', ');
+      const pageStr = dd.mushafPage + (dd.part ? ' ' + dd.part : '');
+      const currentCls = dd.day === currentDay ? ' current-day' : '';
+      return '<div class="sou-day' + currentCls + '" onclick="setActiveDay(' + dd.day + ');closeModal(\'modal-sourate\');closeModal(\'modal-stats\');">' +
+        '<div class="sou-day-num">J' + dd.day + '</div>' +
+        '<div class="sou-day-page">' + pageStr + '</div>' +
+        '<div class="sou-day-verses">' + versesStr + '</div>' +
+        mark +
+      '</div>';
+    }).join('');
+
+    document.getElementById('modal-sourate').classList.add('open');
   }
 
   // ===== A2 · Heatmap 365 derniers jours =====

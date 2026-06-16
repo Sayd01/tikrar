@@ -674,8 +674,20 @@
 
     .sou-section-title { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(14,66,49,0.55); margin: 12px 0 8px; }
 
+    .sou-month-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 12px 10px 6px;
+      font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(14,66,49,0.55);
+      border-bottom: 1px solid rgba(14,66,49,0.08);
+    }
+    .sou-month-head .count {
+      font-size: 10px; letter-spacing: 0; text-transform: none;
+      color: rgba(14,66,49,0.5); font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
     .sou-day {
-      display: grid; grid-template-columns: 38px 64px 1fr auto;
+      display: grid; grid-template-columns: 48px 56px 1fr auto;
       gap: 8px; align-items: center;
       padding: 9px 10px;
       border-bottom: 1px solid rgba(14,66,49,0.04);
@@ -683,13 +695,15 @@
       cursor: pointer; font-variant-numeric: tabular-nums;
     }
     .sou-day:active { background: rgba(14,66,49,0.03); }
-    .sou-day-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); }
+    .sou-day-date { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.6); }
     .sou-day-page { font-weight: 800; color: #0E4231; }
-    .sou-day-verses { font-size: 11px; color: rgba(14,66,49,0.7); font-weight: 600; }
+    .sou-day-verses { font-size: 11px; color: rgba(14,66,49,0.7); font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .sou-day-mark { font-size: 14px; color: rgba(14,66,49,0.3); }
     .sou-day-mark.done { color: #15803D; }
     .sou-day-mark.partial { color: #B98947; }
     .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.12), transparent); }
+    body.eve .sou-month-head { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.1); }
+    body.eve .sou-day-date { color: rgba(255,255,255,0.65); }
     body.eve .sou-name { color: #FCF7EB; }
     body.eve .sou-day-page { color: #E5F2EA; }
     body.eve .sou-day-verses { color: rgba(255,255,255,0.65); }
@@ -2792,22 +2806,58 @@
       }).join('');
     }
 
-    // Liste des jours
+    // Liste des jours — groupés par mois calendaire si startDate set
     const daysListEl = document.getElementById('sou-days-list');
     document.getElementById('sou-days-count').textContent = days.length;
-    daysListEl.innerHTML = days.map(item => {
+    const sd = localStorage.getItem('tikrar:startDate');
+    const startTime = sd ? new Date(sd + 'T00:00:00').getTime() : null;
+    const hasDate = startTime && !isNaN(startTime);
+    const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+    function renderDayRow(item) {
       const dd = item.day, isDone = isDayComplete(dd.day), isPart = !isDone && isDayPartial(dd.day);
       const mark = isDone ? '<span class="sou-day-mark done">✓</span>' : isPart ? '<span class="sou-day-mark partial">◐</span>' : '<span class="sou-day-mark">○</span>';
       const versesStr = item.chunks.map(c => 'v' + (c.f === c.t ? c.f : c.f + '-' + c.t)).join(', ');
       const pageStr = dd.mushafPage + (dd.part ? ' ' + dd.part : '');
       const currentCls = dd.day === currentDay ? ' current-day' : '';
+      let dateLabel;
+      if (hasDate) {
+        const dt = new Date(startTime + (dd.day - 1) * 86400000);
+        dateLabel = dt.getDate() + ' ' + MONTHS[dt.getMonth()].slice(0, 3) + '.';
+      } else {
+        dateLabel = 'J' + dd.day;
+      }
       return '<div class="sou-day' + currentCls + '" onclick="setActiveDay(' + dd.day + ');closeModal(\'modal-sourate\');closeModal(\'modal-stats\');">' +
-        '<div class="sou-day-num">J' + dd.day + '</div>' +
+        '<div class="sou-day-date">' + dateLabel + '</div>' +
         '<div class="sou-day-page">' + pageStr + '</div>' +
         '<div class="sou-day-verses">' + versesStr + '</div>' +
         mark +
       '</div>';
-    }).join('');
+    }
+
+    if (hasDate && days.length > 0) {
+      // Grouper par mois calendaire
+      const groups = {};
+      const order = [];
+      days.forEach(item => {
+        const dt = new Date(startTime + (item.day.day - 1) * 86400000);
+        const key = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
+        if (!groups[key]) { groups[key] = []; order.push(key); }
+        groups[key].push(item);
+      });
+      let html = '';
+      order.forEach(k => {
+        const [y, m] = k.split('-');
+        const label = MONTHS[parseInt(m) - 1].toUpperCase() + ' ' + y;
+        const items = groups[k];
+        const doneN = items.filter(it => isDayComplete(it.day.day)).length;
+        html += '<div class="sou-month-head"><span>' + label + '</span><span class="count">' + doneN + ' / ' + items.length + '</span></div>';
+        items.forEach(item => { html += renderDayRow(item); });
+      });
+      daysListEl.innerHTML = html;
+    } else {
+      daysListEl.innerHTML = days.map(renderDayRow).join('');
+    }
 
     document.getElementById('modal-sourate').classList.add('open');
   }

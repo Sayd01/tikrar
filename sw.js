@@ -1,6 +1,6 @@
 // Tikrar Service Worker — stratégie network-first
 // Sert toujours la dernière version quand en ligne, tombe sur le cache hors-ligne.
-const CACHE_NAME = 'tikrar-v6';
+const CACHE_NAME = 'tikrar-v7';
 const ASSETS = [
   './',
   './index.html',

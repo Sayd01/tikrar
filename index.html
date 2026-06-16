@@ -264,23 +264,25 @@
     .modal-overlay.center { align-items: center; padding: 20px; }
     .modal-sheet {
       width: 100%; max-width: 480px;
-      height: 92vh;          /* fallback */
-      height: 92dvh;         /* viewport dynamique (tient compte barre URL Chrome) */
-      min-height: 80vh;
-      min-height: 80dvh;
+      height: 96vh;
+      height: 96dvh;
       background: #FAF6EC;
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
       overflow-y: auto;
-      padding: 16px 18px 30px;
+      padding: 14px 18px 30px;
       animation: slideUp 0.35s cubic-bezier(.16,1,.3,1);
-      box-shadow: 0 -8px 32px rgba(7,48,38,0.18);
     }
     .modal-overlay.center .modal-sheet {
-      border-radius: 22px; max-width: 380px;
-      height: auto; min-height: 0;
-      max-height: 90vh; max-height: 90dvh;
+      border-radius: 22px;
+      max-width: 380px;
+      height: auto;
+      max-height: 92vh; max-height: 92dvh;
       padding: 22px;
+    }
+    @supports (padding: max(0px)) {
+      .modal-sheet { padding-bottom: max(30px, env(safe-area-inset-bottom)); }
+      .modal-overlay.center .modal-sheet { padding-bottom: 22px; }
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

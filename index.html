@@ -235,9 +235,14 @@
 
     /* ===== MODAL SHEETS ===== */
     .modal-overlay {
-      position: fixed; inset: 0; z-index: 50;
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      height: 100vh;
+      height: 100dvh;
+      z-index: 50;
       background: rgba(7, 48, 38, 0.6);
       backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       display: none;
       align-items: flex-end;
       justify-content: center;
@@ -247,15 +252,24 @@
     .modal-overlay.center { align-items: center; padding: 20px; }
     .modal-sheet {
       width: 100%; max-width: 480px;
-      height: 92vh;
+      height: 92vh;          /* fallback */
+      height: 92dvh;         /* viewport dynamique (tient compte barre URL Chrome) */
+      min-height: 80vh;
+      min-height: 80dvh;
       background: #FAF6EC;
       border-top-left-radius: 24px;
       border-top-right-radius: 24px;
       overflow-y: auto;
       padding: 16px 18px 30px;
       animation: slideUp 0.35s cubic-bezier(.16,1,.3,1);
+      box-shadow: 0 -8px 32px rgba(7,48,38,0.18);
     }
-    .modal-overlay.center .modal-sheet { border-radius: 22px; max-width: 380px; height: auto; max-height: 92vh; padding: 22px; }
+    .modal-overlay.center .modal-sheet {
+      border-radius: 22px; max-width: 380px;
+      height: auto; min-height: 0;
+      max-height: 90vh; max-height: 90dvh;
+      padding: 22px;
+    }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .modal-handle { width: 36px; height: 4px; background: rgba(14,66,49,0.2); border-radius: 999px; margin: 0 auto 14px; }
@@ -2041,12 +2055,15 @@
   // ============================================================
   function openCarnet() {
     haptic(10);
+    // Pré-rendu synchrone AVANT d'ouvrir → la sheet a sa hauteur définitive
     if (!document.getElementById('row-' + currentDay)) renderAll();
+    // Force un reflow avant d'animer pour que la hauteur soit calculée
     document.getElementById('modal-carnet').classList.add('open');
+    document.getElementById('modal-carnet').offsetHeight; // trigger reflow
     setTimeout(() => {
       const el = document.getElementById('row-' + currentDay);
       if (el) el.scrollIntoView({ block: 'center', behavior: 'auto' });
-    }, 80);
+    }, 120);
   }
 
   // ============================================================

@@ -1388,12 +1388,7 @@
 
     // En-tête du jour
     document.getElementById('today-daynum').textContent = 'Jour ' + currentDay + ' / ' + TOTAL_DAYS;
-
-    // Quick-stats (pages + juz mémorisés)
-    const pgs = calculatePagesMemorized();
-    const jz = calculateJuzMemorized();
-    document.getElementById('today-quickstats').innerHTML =
-      '<strong>' + pgs + '</strong>/604 pages<span class="sep">·</span><strong>' + jz + '</strong>/30 juz';
+    updateQuickStats();
 
     const pageEl = document.getElementById('today-page');
     const sourateEl = document.getElementById('today-sourate');
@@ -1673,10 +1668,22 @@
     saveState();
   }
 
+  // Met à jour la ligne quick-stats du hero (pages + juz mémorisés)
+  function updateQuickStats() {
+    const el = document.getElementById('today-quickstats');
+    if (!el) return;
+    _pageDays = null; // invalide le cache au cas où programData a changé
+    const pgs = calculatePagesMemorized();
+    const jz = calculateJuzMemorized();
+    el.innerHTML =
+      '<strong>' + pgs + '</strong>/604 pages<span class="sep">·</span><strong>' + jz + '</strong>/30 juz';
+  }
+
   function updateHeader() {
     const s = calculateStreak();
     document.getElementById('streak-num').textContent = s;
     document.getElementById('streak-pill').classList.toggle('zero', s === 0);
+    updateQuickStats();
 
     // Pill calendaire : visible seulement si écart > 1 jour
     const rhythm = calculateRhythm();

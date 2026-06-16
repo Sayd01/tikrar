@@ -512,6 +512,83 @@
       color: rgba(14,66,49,0.5); font-size: 12px; font-style: italic;
     }
 
+    /* ===== STATS : Comparaison hebdo / mensuelle ===== */
+    .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .week-card {
+      background: white;
+      border: 1px solid rgba(14,66,49,0.06);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .week-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(14,66,49,0.55); }
+    .week-value { font-size: 22px; font-weight: 800; color: #0E4231; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .week-value .denom { font-size: 14px; color: rgba(14,66,49,0.5); font-weight: 700; }
+    .week-pct { font-size: 11px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; }
+    .week-pct.good { color: #15803D; }
+    .week-pct.bad { color: #B91C1C; }
+    .week-pct.neutral { color: rgba(14,66,49,0.5); }
+    .week-trend { font-size: 10px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .week-trend.up { color: #15803D; }
+    .week-trend.down { color: #B91C1C; }
+    .week-trend.flat { color: rgba(14,66,49,0.5); }
+
+    /* ===== STATS : Liste par sourate ===== */
+    .surah-search {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid rgba(14,66,49,0.12);
+      border-radius: 10px; margin-bottom: 8px;
+      font-size: 13px; font-family: inherit;
+      color: #1A1F2C; background: white;
+    }
+    .surah-search:focus { outline: none; border-color: #308A60; }
+    .surah-list {
+      max-height: 320px; overflow-y: auto;
+      border: 1px solid rgba(14,66,49,0.06);
+      border-radius: 10px;
+      background: white;
+    }
+    .surah-row {
+      display: grid; grid-template-columns: 28px 1fr 60px 38px;
+      gap: 8px; align-items: center;
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(14,66,49,0.04);
+      font-size: 12px;
+    }
+    .surah-row:last-child { border-bottom: none; }
+    .surah-row:active { background: rgba(14,66,49,0.02); }
+    .surah-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); font-variant-numeric: tabular-nums; }
+    .surah-name { font-weight: 700; color: #0E4231; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .surah-bar-wrap { height: 5px; background: rgba(14,66,49,0.06); border-radius: 999px; overflow: hidden; }
+    .surah-bar-fill { height: 100%; border-radius: 999px; transition: width .4s; }
+    .surah-row.complete .surah-bar-fill { background: linear-gradient(90deg, #52A57A, #15573B); }
+    .surah-row.half .surah-bar-fill     { background: linear-gradient(90deg, #7CC09B, #308A60); }
+    .surah-row.partial .surah-bar-fill  { background: linear-gradient(90deg, #E6C36A, #B98947); }
+    .surah-row.empty .surah-bar-fill    { background: rgba(14,66,49,0.15); }
+    .surah-pct { font-size: 11px; font-weight: 700; color: rgba(14,66,49,0.6); font-variant-numeric: tabular-nums; text-align: right; }
+    .surah-row.complete .surah-pct { color: #15573B; }
+
+    /* ===== CARNET : recherche ===== */
+    .carnet-search {
+      margin: 0 18px 12px;
+      display: flex; gap: 8px;
+    }
+    .carnet-search input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid rgba(14,66,49,0.12);
+      border-radius: 10px;
+      font-size: 14px; font-family: inherit; font-variant-numeric: tabular-nums;
+      color: #1A1F2C; background: white;
+    }
+    .carnet-search input:focus { outline: none; border-color: #308A60; }
+    .carnet-search button {
+      padding: 10px 14px;
+      background: #1E3A5F;
+      border: none; border-radius: 10px;
+      color: white; font-weight: 700; font-size: 13px;
+      cursor: pointer; font-family: inherit;
+    }
+
     /* Task cards (gros, tappables) */
     .today-tasks { margin-top: 18px; flex: 1; }
     .tcard {
@@ -827,6 +904,10 @@
     <div class="modal-sheet" style="padding: 16px 0 30px;">
       <div class="modal-handle"></div>
       <h2 class="modal-title" style="padding: 0 18px;">Le Carnet</h2>
+      <div class="carnet-search">
+        <input type="text" id="carnet-search-input" placeholder="Sourate, page, jour…" oninput="filterCarnet(this.value)" inputmode="search">
+        <button onclick="jumpCarnet()">Aller</button>
+      </div>
       <div class="legend">
         <div>Jour</div>
         <div>Page</div>
@@ -927,6 +1008,33 @@
       <div class="modal-card" style="margin-top: 8px;">
         <div class="field-label" style="margin-bottom: 8px;">Par Juz <span id="juz-summary" class="tabular" style="float: right; color: rgba(14,66,49,0.6);">0 / 30</span></div>
         <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;" id="juz-grid"></div>
+      </div>
+
+      <!-- ============ Comparaison hebdo / mensuelle ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 10px;">Régularité</div>
+        <div class="week-grid">
+          <div class="week-card">
+            <div class="week-label">7 derniers jours</div>
+            <div class="week-value tabular"><span id="wk-this">0</span><span class="denom"> / 7</span></div>
+            <div class="week-pct neutral" id="wk-this-pct">0%</div>
+            <div class="week-trend flat" id="wk-this-trend">—</div>
+          </div>
+          <div class="week-card">
+            <div class="week-label">30 derniers jours</div>
+            <div class="week-value tabular"><span id="m-this">0</span><span class="denom"> / 30</span></div>
+            <div class="week-pct neutral" id="m-this-pct">0%</div>
+            <div class="week-trend flat" id="m-this-trend">—</div>
+          </div>
+        </div>
+        <p style="font-size: 10px; color: rgba(14,66,49,0.5); margin-top: 10px; font-weight: 600;">Basé sur tes jours de programme jusqu'à aujourd'hui.</p>
+      </div>
+
+      <!-- ============ Liste par sourate ============ -->
+      <div class="modal-card">
+        <div class="field-label" style="margin-bottom: 8px;">Par sourate <span id="surah-summary" class="tabular" style="float: right; color: rgba(14,66,49,0.6);">0 / 114</span></div>
+        <input type="text" class="surah-search" id="surah-search" placeholder="Filtrer une sourate…" oninput="renderSurahList(this.value)">
+        <div class="surah-list" id="surah-list"></div>
       </div>
     </div>
   </div>
@@ -1827,6 +1935,9 @@
   function openStats() {
     updateStats();
     renderJuzGrid();
+    renderWeeklyStats();
+    renderSurahList('');
+    document.getElementById('surah-search').value = '';
     document.getElementById('modal-stats').classList.add('open');
   }
   function openSettings() {
@@ -2050,6 +2161,141 @@
     document.getElementById('day-breakdown').innerHTML = renderBreakdown(b);
     document.getElementById('missed-stats').innerHTML = renderMissed(b);
   }
+  // ===== G6 : Comparaison hebdo / mensuelle =====
+  function calculateWeeklyStats() {
+    let wk = 0, wkPrev = 0, m = 0, mPrev = 0;
+    for (let d = 1; d <= currentDay; d++) {
+      if (!isDayComplete(d)) continue;
+      const delta = currentDay - d;
+      if (delta < 7) wk++;
+      else if (delta < 14) wkPrev++;
+      if (delta < 30) m++;
+      else if (delta < 60) mPrev++;
+    }
+    return { wk, wkPrev, m, mPrev };
+  }
+  function renderWeeklyStats() {
+    const s = calculateWeeklyStats();
+    const wkMax = Math.min(7, currentDay);
+    const mMax  = Math.min(30, currentDay);
+    document.getElementById('wk-this').textContent = s.wk;
+    document.getElementById('m-this').textContent = s.m;
+
+    const wkPct = wkMax > 0 ? Math.round((s.wk / wkMax) * 100) : 0;
+    const mPct  = mMax > 0 ? Math.round((s.m  / mMax)  * 100) : 0;
+    const wkPctEl = document.getElementById('wk-this-pct');
+    const mPctEl  = document.getElementById('m-this-pct');
+    wkPctEl.textContent = wkPct + '%';
+    mPctEl.textContent  = mPct + '%';
+    wkPctEl.className = 'week-pct ' + (wkPct >= 80 ? 'good' : wkPct >= 50 ? 'neutral' : 'bad');
+    mPctEl.className  = 'week-pct ' + (mPct  >= 80 ? 'good' : mPct  >= 50 ? 'neutral' : 'bad');
+
+    const wkTrendEl = document.getElementById('wk-this-trend');
+    const mTrendEl  = document.getElementById('m-this-trend');
+    const wkDiff = s.wk - s.wkPrev;
+    const mDiff  = s.m  - s.mPrev;
+    wkTrendEl.textContent = (wkDiff > 0 ? '↑ +' : wkDiff < 0 ? '↓ ' : '→ ') + Math.abs(wkDiff) + ' vs précédente';
+    wkTrendEl.className = 'week-trend ' + (wkDiff > 0 ? 'up' : wkDiff < 0 ? 'down' : 'flat');
+    mTrendEl.textContent = (mDiff > 0 ? '↑ +' : mDiff < 0 ? '↓ ' : '→ ') + Math.abs(mDiff) + ' vs précédent';
+    mTrendEl.className = 'week-trend ' + (mDiff > 0 ? 'up' : mDiff < 0 ? 'down' : 'flat');
+  }
+
+  // ===== G4 : Stats par sourate =====
+  function calculateSurahStats() {
+    const stats = {};
+    for (let s = 1; s <= 114; s++) stats[s] = { done: 0, total: 0 };
+    programData.forEach(d => {
+      if (d.isClosing) return;
+      const verses = getVersesForTask(d.mushafPage, d.part);
+      if (!verses) return;
+      const isDone = isDayComplete(d.day);
+      verses.forEach(c => {
+        const n = c.t - c.f + 1;
+        stats[c.s].total += n;
+        if (isDone) stats[c.s].done += n;
+      });
+    });
+    return stats;
+  }
+  function renderSurahList(filter) {
+    const stats = calculateSurahStats();
+    const term = (filter || '').toLowerCase().trim();
+    let html = '', complete = 0;
+    for (let s = 1; s <= 114; s++) {
+      const st = stats[s];
+      const pct = st.total > 0 ? Math.round((st.done / st.total) * 100) : 0;
+      if (pct >= 100) complete++;
+      const name = SURAH_NAMES[s - 1];
+      if (term && !name.toLowerCase().includes(term) && !String(s).includes(term)) continue;
+      const cls = pct >= 100 ? 'complete' : pct >= 50 ? 'half' : pct > 0 ? 'partial' : 'empty';
+      html += '<div class="surah-row ' + cls + '" onclick="jumpToSurah(' + s + ')">' +
+        '<div class="surah-num">' + s + '</div>' +
+        '<div class="surah-name">' + name + '</div>' +
+        '<div class="surah-bar-wrap"><div class="surah-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="surah-pct">' + pct + '%</div>' +
+      '</div>';
+    }
+    document.getElementById('surah-list').innerHTML = html || '<div class="err-empty">Aucune sourate ne correspond.</div>';
+    document.getElementById('surah-summary').textContent = complete + ' / 114';
+  }
+
+  function jumpToSurah(surahNum) {
+    // Aller au 1er jour qui contient cette sourate
+    const target = programData.find(d => !d.isClosing && d.sourate === SURAH_NAMES[surahNum - 1]);
+    if (!target) return;
+    closeModal('modal-stats');
+    setActiveDay(target.day);
+    showToast(SURAH_NAMES[surahNum - 1]);
+  }
+
+  // ===== G5 : Recherche / jump dans le carnet =====
+  function filterCarnet(text) {
+    const term = (text || '').toLowerCase().trim();
+    document.querySelectorAll('#rows > .row').forEach(row => {
+      if (!term) { row.style.display = ''; return; }
+      const day = row.dataset.day;
+      const d = programData[parseInt(day) - 1];
+      if (!d) { row.style.display = 'none'; return; }
+      const haystack = (d.isClosing
+        ? 'clôture cloture ' + d.closingTour + ' ' + day
+        : (d.sourate + ' ' + d.mushafPage + ' ' + day + ' juz ' + d.juz)
+      ).toLowerCase();
+      row.style.display = haystack.includes(term) ? '' : 'none';
+    });
+  }
+  function jumpCarnet() {
+    const val = document.getElementById('carnet-search-input').value.trim();
+    if (!val) return;
+    // Si c'est un nombre : jour ou page
+    const n = parseInt(val);
+    if (!isNaN(n) && String(n) === val) {
+      if (n >= 1 && n <= TOTAL_DAYS) {
+        // Jour direct
+        setActiveDay(n);
+        closeModal('modal-carnet');
+        return;
+      }
+      if (n >= 1 && n <= 604) {
+        // Page : aller au 1er jour qui contient cette page
+        const target = programData.find(d => !d.isClosing && d.mushafPage === n);
+        if (target) {
+          setActiveDay(target.day);
+          closeModal('modal-carnet');
+          return;
+        }
+      }
+    }
+    // Sinon : 1er jour dont la sourate matche
+    const term = val.toLowerCase();
+    const target = programData.find(d => !d.isClosing && d.sourate && d.sourate.toLowerCase().includes(term));
+    if (target) {
+      setActiveDay(target.day);
+      closeModal('modal-carnet');
+    } else {
+      showToast('Pas de résultat pour « ' + val + ' »');
+    }
+  }
+
   function renderJuzGrid() {
     const grid = document.getElementById('juz-grid');
     let html = '', juzDone = 0;

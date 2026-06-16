@@ -222,25 +222,6 @@
     .switch .knob { position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform .25s cubic-bezier(.16,1,.3,1); }
     .switch.on .knob { transform: translateX(18px); }
 
-    /* Versets composant un tiers */
-    .task-verses {
-      margin: 10px 0 4px 44px;
-      padding: 9px 12px;
-      background: rgba(212,165,116,0.10);
-      border-left: 2.5px solid rgba(212,165,116,0.55);
-      border-radius: 7px;
-      font-size: 13px; font-weight: 600;
-      color: rgba(14,66,49,0.88);
-      letter-spacing: -0.005em;
-    }
-    .task-verses .vlabel {
-      font-size: 9px; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.14em;
-      color: #946930; display: block; margin-bottom: 3px;
-    }
-    .task-verses .vmuted { color: rgba(14,66,49,0.5); font-weight: 500; }
-    .task-verses strong { color: #15573B; font-weight: 800; }
-
     .notes {
       margin-top: 8px; width: 100%;
       background: #FAF6EC;
@@ -698,27 +679,27 @@
     return { fromS: fV[0].s, fromA: fV[0].f, toS: tV[tV.length - 1].s, toA: tV[tV.length - 1].t };
   }
 
-  // Formatage HTML d'un array de chunks (versets précis du tiers)
-  function fmtChunks(chunks) {
+  // Texte des versets d'un tiers (sans HTML, pour content/extra)
+  function fmtChunksText(chunks) {
     if (!chunks || !chunks.length) return '';
     if (chunks.length === 1) {
-      const c = chunks[0], n = c.t - c.f + 1;
-      const range = c.f === c.t ? ('verset ' + c.f) : ('versets ' + c.f + ' → ' + c.t);
-      return '<strong>' + SURAH_NAMES[c.s - 1] + '</strong> ' + range + ' <span class="vmuted">(' + n + ')</span>';
+      const c = chunks[0];
+      return SURAH_NAMES[c.s - 1] + ' ' + (c.f === c.t ? c.f : c.f + ' → ' + c.t);
     }
-    return chunks.map(c => {
-      const range = c.f === c.t ? c.f : c.f + '-' + c.t;
-      return '<strong>' + SURAH_NAMES[c.s - 1] + '</strong> ' + range;
-    }).join(' · ');
+    return chunks.map(c => SURAH_NAMES[c.s - 1] + ' ' + (c.f === c.t ? c.f : c.f + '-' + c.t)).join(' · ');
   }
 
-  // Formatage HTML d'un range (liaison/révision)
-  function fmtRange(r) {
+  // Texte d'un range (liaison/révision)
+  function fmtRangeText(r) {
     if (!r) return '';
-    if (r.fromS === r.toS) {
-      return '<strong>' + SURAH_NAMES[r.fromS - 1] + '</strong> ' + r.fromA + ' → ' + r.toA;
-    }
-    return '<strong>' + SURAH_NAMES[r.fromS - 1] + '</strong> ' + r.fromA + ' → <strong>' + SURAH_NAMES[r.toS - 1] + '</strong> ' + r.toA;
+    if (r.fromS === r.toS) return SURAH_NAMES[r.fromS - 1] + ' ' + r.fromA + ' → ' + r.toA;
+    return SURAH_NAMES[r.fromS - 1] + ' ' + r.fromA + ' → ' + SURAH_NAMES[r.toS - 1] + ' ' + r.toA;
+  }
+
+  // Nombre total de versets dans une liste de chunks
+  function countVerses(chunks) {
+    if (!chunks) return 0;
+    return chunks.reduce((s, c) => s + (c.t - c.f + 1), 0);
   }
 
   // ============================================================
@@ -736,32 +717,41 @@
       }];
     }
     const t = [];
+
+    // ===== Mémorisation : versets en premier, info technique réduite =====
+    const memoVerses = getVersesForTask(d.mushafPage, d.part);
+    const memoText = fmtChunksText(memoVerses);
+    const memoCount = countVerses(memoVerses);
     t.push({
       id: 'memo',
       label: 'Mémorisation',
-      content: 'Page ' + d.mushafPage + (d.part ? ' ' + d.part : ''),
-      extra: d.sourate + ' · ' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + ' · Juz ' + d.juz,
-      icon: ICONS.memo,
-      verses: fmtChunks(getVersesForTask(d.mushafPage, d.part))
+      content: memoText || ('Page ' + d.mushafPage + (d.part ? ' ' + d.part : '')),
+      extra: memoCount > 0 ? memoCount + (memoCount > 1 ? ' versets' : ' verset') : '',
+      icon: ICONS.memo
     });
+
+    // ===== Liaison : pages + versets =====
     if ((d.liaisonEndDay || 0) >= 1) {
+      const liaisonText = fmtRangeText(getRangeVerses(d.liaisonStartDay, d.liaisonEndDay));
       t.push({
         id: 'liaison',
         label: 'Liaison (Rabt)',
         content: 'Pages ' + formatRange(d.liaisonStartDay, d.liaisonEndDay),
-        extra: 'Réciter sans regarder le Coran',
-        icon: ICONS.liaison,
-        verses: fmtRange(getRangeVerses(d.liaisonStartDay, d.liaisonEndDay))
+        extra: liaisonText || 'Réciter sans regarder',
+        icon: ICONS.liaison
       });
     }
+
+    // ===== Révision : pages + tour + versets =====
     if ((d.tourNumber || 0) >= 1) {
+      const revText = fmtRangeText(getRangeVerses(d.revisionStartDay, d.revisionEndDay));
+      const tourInfo = 'Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6';
       t.push({
         id: 'revision',
         label: 'Révision (Murajaa)',
         content: 'Pages ' + formatRange(d.revisionStartDay, d.revisionEndDay),
-        extra: 'Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6 · sans regarder',
-        icon: ICONS.revision,
-        verses: fmtRange(getRangeVerses(d.revisionStartDay, d.revisionEndDay))
+        extra: revText ? tourInfo + ' · ' + revText : tourInfo,
+        icon: ICONS.revision
       });
     }
     return t;
@@ -884,9 +874,6 @@
           '</div>' +
           '<div class="switch' + (isDone ? ' on' : '') + '"><div class="knob"></div></div>' +
         '</div>';
-      if (t.verses) {
-        tasksHtml += '<div class="task-verses"><span class="vlabel">Versets à travailler</span>' + t.verses + '</div>';
-      }
     });
     tasksHtml += '</div>';
 

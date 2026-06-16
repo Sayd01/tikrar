@@ -222,19 +222,6 @@
     .switch .knob { position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform .25s cubic-bezier(.16,1,.3,1); }
     .switch.on .knob { transform: translateX(18px); }
 
-    .technique {
-      margin: -4px 0 10px 44px;
-      padding: 9px 12px;
-      background: rgba(212,165,116,0.08);
-      border-left: 2px solid rgba(212,165,116,0.4);
-      border-radius: 6px;
-      font-size: 11px;
-      color: rgba(14,66,49,0.82);
-      font-weight: 500;
-      line-height: 1.6;
-    }
-    .technique strong { color: #946930; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 3px; }
-
     .notes {
       margin-top: 8px; width: 100%;
       background: #FAF6EC;
@@ -654,8 +641,7 @@
       label: 'Mémorisation',
       content: 'Page ' + d.mushafPage + (d.part ? ' ' + d.part : ''),
       extra: d.sourate + ' · ' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + ' · Juz ' + d.juz,
-      icon: ICONS.memo,
-      hasTechnique: true
+      icon: ICONS.memo
     });
     if ((d.liaisonEndDay || 0) >= 1) {
       t.push({
@@ -795,15 +781,6 @@
           '</div>' +
           '<div class="switch' + (isDone ? ' on' : '') + '"><div class="knob"></div></div>' +
         '</div>';
-      if (t.hasTechnique) {
-        tasksHtml += '<div class="technique"><strong>Technique de mémorisation</strong>' +
-          '1. Répétition de la veille × 5 (sans regarder)<br>' +
-          '2. Écoute × 3 (en regardant le Coran)<br>' +
-          '3. Interprétation (Tafsir Al-Muyassar)<br>' +
-          '4. Enregistrement × 3 (sans regarder)<br>' +
-          '5. Répétition × 40 (la nouvelle demi-page)' +
-        '</div>';
-      }
     });
     tasksHtml += '</div>';
 

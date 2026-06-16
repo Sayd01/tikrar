@@ -143,7 +143,19 @@
     }
     .dot.na:hover { border-color: rgba(14,66,49,0.13); }
 
-    /* ===== EXPANDED ROW (current day) ===== */
+    /* Highlight de la ligne du jour courant dans le carnet */
+    .row.current-day {
+      background: linear-gradient(90deg, rgba(48,138,96,0.16), rgba(48,138,96,0.04)) !important;
+      border-left: 3px solid #308A60;
+      padding-left: 13px;
+    }
+    .row.current-day .day { color: #15573B; font-weight: 800; }
+    .row.current-day .page { color: #073026; }
+    body.eve .row.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.25), rgba(48,138,96,0.08)) !important; }
+    body.eve .row.current-day .day { color: #7CC09B; }
+    body.eve .row.current-day .page { color: #E5F2EA; }
+
+    /* ===== EXPANDED ROW (legacy, conservé non utilisé) ===== */
     .row.expanded {
       display: block;
       padding: 18px 20px 16px;
@@ -1740,9 +1752,8 @@
   function renderAll() {
     const c = document.getElementById('rows');
     let html = '';
-    for (let day = 1; day <= TOTAL_DAYS; day++) {
-      html += (day === currentDay) ? renderExpanded(day) : renderCompact(day);
-    }
+    // Toutes les lignes compactes : le jour courant est simplement highlighté
+    for (let day = 1; day <= TOTAL_DAYS; day++) html += renderCompact(day);
     c.innerHTML = html;
   }
 
@@ -1785,6 +1796,7 @@
     let cls = 'row';
     if (done) cls += ' done';
     else if (partial) cls += ' partial';
+    if (day === currentDay) cls += ' current-day';
 
     return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setDayFromCarnet(' + day + ')">' +
       '<div class="day">' + day + '</div>' +
@@ -1882,9 +1894,8 @@
   function replaceRow(day) {
     const el = document.getElementById('row-' + day);
     if (!el) return;
-    const html = (day === currentDay) ? renderExpanded(day) : renderCompact(day);
     const tmp = document.createElement('div');
-    tmp.innerHTML = html;
+    tmp.innerHTML = renderCompact(day);
     el.parentNode.replaceChild(tmp.firstChild, el);
   }
 

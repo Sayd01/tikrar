@@ -71,10 +71,10 @@
       border-bottom: 1px solid rgba(14,66,49,0.08);
       max-width: 640px; margin: 0 auto;
       display: grid;
-      grid-template-columns: 38px 64px 1fr 78px;
+      grid-template-columns: 38px 64px 1fr 96px;
       gap: 10px; align-items: center;
-      padding: 10px 18px 8px;
-      font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+      padding: 12px 18px 10px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
       text-transform: uppercase; color: rgba(14,66,49,0.42);
     }
     .legend > div:last-child { text-align: right; }
@@ -85,9 +85,9 @@
 
     .row {
       display: grid;
-      grid-template-columns: 38px 64px 1fr 78px;
+      grid-template-columns: 38px 64px 1fr 96px;
       gap: 10px; align-items: center;
-      padding: 12px 16px;
+      padding: 16px 18px;
       border-bottom: 1px solid rgba(14,66,49,0.05);
       cursor: pointer;
       background: white;
@@ -119,12 +119,13 @@
     .row .dots { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
 
     .dot {
-      width: 18px; height: 18px; border-radius: 50%;
+      width: 24px; height: 24px; border-radius: 50%;
       border: 1.5px solid rgba(14,66,49,0.3);
       background: white;
       transition: all .15s;
       flex-shrink: 0; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
+      background-clip: padding-box;
     }
     .dot:active { transform: scale(0.9); }
     .dot:hover { border-color: #308A60; }
@@ -591,12 +592,14 @@
       background: white;
     }
     .surah-row {
-      display: grid; grid-template-columns: 24px 1fr 60px 56px;
+      display: grid; grid-template-columns: 22px 1fr 50px 38px 12px;
       gap: 8px; align-items: center;
       padding: 10px 12px;
       border-bottom: 1px solid rgba(14,66,49,0.04);
       font-size: 12px; cursor: pointer;
     }
+    .surah-chev { font-size: 14px; color: rgba(14,66,49,0.35); text-align: right; line-height: 1; }
+    .surah-row:hover .surah-chev { color: rgba(14,66,49,0.7); }
     .surah-row:last-child { border-bottom: none; }
     .surah-row:active { background: rgba(14,66,49,0.02); }
     .surah-num { font-size: 10px; font-weight: 700; color: rgba(14,66,49,0.5); font-variant-numeric: tabular-nums; }
@@ -786,18 +789,19 @@
       background: white;
       border: 1.5px solid rgba(14,66,49,0.07);
       border-radius: 18px;
-      padding: 18px 18px 16px;
-      margin-bottom: 12px;
+      padding: 22px 20px 20px;
+      margin-bottom: 16px;
       cursor: pointer;
       transition: transform .15s, border-color .25s, background .35s, box-shadow .25s;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 2px 4px rgba(14,66,49,0.03), 0 8px 16px rgba(14,66,49,0.03), 0 16px 32px rgba(14,66,49,0.03);
     }
     .tcard:active { transform: scale(0.985); }
     .tcard.done {
       background: linear-gradient(135deg, #EEF7F1, #D6ECDF);
       border-color: rgba(48,138,96,0.35);
-      box-shadow: 0 4px 16px rgba(48,138,96,0.1);
+      box-shadow: 0 4px 8px rgba(48,138,96,0.06), 0 12px 24px rgba(48,138,96,0.08);
     }
     .tcard-head { display: flex; align-items: center; gap: 14px; }
     .tcard-icon {
@@ -1126,10 +1130,13 @@
     </div>
   </div>
 
-  <!-- ============ MODAL : détail d'une sourate ============ -->
-  <div id="modal-sourate" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-sourate')">
+  <!-- ============ MODAL : détail d'une sourate (z-index élevé pour passer au-dessus de stats) ============ -->
+  <div id="modal-sourate" class="modal-overlay" style="z-index: 56;" onclick="if(event.target===this)closeModal('modal-sourate')">
     <div class="modal-sheet">
-      <h2 class="modal-title" style="font-size:14px; opacity:0.6; margin-bottom: 4px;">Sourate</h2>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom: 8px;">
+        <button onclick="closeModal('modal-sourate')" aria-label="Retour" style="background:rgba(14,66,49,0.06); border:none; width:32px; height:32px; border-radius:999px; color:#1A1F2C; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">‹</button>
+        <h2 class="modal-title" style="font-size:14px; opacity:0.6; margin: 0;">Sourate</h2>
+      </div>
       <div class="sou-hero">
         <div class="sou-name" id="sou-name">—</div>
         <div class="sou-meta" id="sou-meta"></div>
@@ -2090,6 +2097,7 @@
     updateHeader();
 
     if (!wasOn && isDayComplete(day)) {
+      haptic(50);
       showConfetti();
       setTimeout(showCelebration, 350);
     }
@@ -2593,7 +2601,7 @@
       else if (st.done === 0) versesLine = st.total + ' versets';
       else versesLine = st.done + ' / ' + st.total + ' versets · <span class="rem">' + rem + ' restants</span>';
 
-      html += '<div class="surah-row ' + cls + '" onclick="jumpToSurah(' + s + ')">' +
+      html += '<div class="surah-row ' + cls + '" onclick="openSourate(' + s + ')">' +
         '<div class="surah-num">' + s + '</div>' +
         '<div class="surah-info">' +
           '<div class="surah-name">' + name + '</div>' +
@@ -2601,6 +2609,7 @@
         '</div>' +
         '<div class="surah-bar-wrap"><div class="surah-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<div class="surah-pct">' + pct + '%</div>' +
+        '<div class="surah-chev">›</div>' +
       '</div>';
     }
     document.getElementById('surah-list').innerHTML = html || '<div class="err-empty">Aucune sourate ne correspond.</div>';

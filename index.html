@@ -170,7 +170,7 @@
       font-size: 22px; font-weight: 800; color: #073026;
       line-height: 1.15; margin-top: 6px; letter-spacing: -0.02em;
     }
-    .ex-title .half { color: #B98947; font-size: 14px; font-weight: 700; margin-left: 3px; vertical-align: 1px; }
+    .ex-title .part { color: #B98947; font-size: 14px; font-weight: 700; margin-left: 3px; vertical-align: 1px; }
     .ex-title .sep { color: rgba(14,66,49,0.3); margin: 0 6px; font-weight: 400; }
     .ex-title .makkan { color: #946930; }
     .ex-title .medinan { color: #308A60; }
@@ -363,7 +363,7 @@
       <div class="hdr-title">
         <span class="arabic">تكرار</span>
         <button class="hdr-counter tabular" onclick="jumpToCurrent()" aria-label="Aller au jour courant">
-          Jour <span id="hd-day">1</span> / 1386
+          Jour <span id="hd-day">1</span> / 1988
         </button>
       </div>
       <div class="hdr-actions">
@@ -411,7 +411,7 @@
           </svg>
           <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <span class="tabular" style="font-size: 30px; font-weight: 800; color: #073026;" id="stats-pct">0%</span>
-            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 1386</span>
+            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 1988</span>
           </div>
         </div>
       </div>
@@ -473,10 +473,10 @@
       <div class="modal-card">
         <label class="field-label" for="set-current-day">Jour courant</label>
         <div style="display: flex; gap: 8px;">
-          <input type="number" id="set-current-day" min="1" max="1386" class="field-input" placeholder="N°" style="flex: 1;">
+          <input type="number" id="set-current-day" min="1" max="1988" class="field-input" placeholder="N°" style="flex: 1;">
           <button class="btn-primary" onclick="settingsSetDay()" style="padding: 9px 16px;">OK</button>
         </div>
-        <p class="field-help">1 → 1206 mémorisation · 1207 → 1386 clôture</p>
+        <p class="field-help">1 → 1808 mémorisation · 1809 → 1988 clôture</p>
       </div>
 
       <div class="modal-card">
@@ -522,7 +522,7 @@
         <h2 style="font-size: 16px; font-weight: 800; color: #0E4231; margin-top: 6px;">Bienvenue</h2>
         <p style="font-size: 11px; color: rgba(14,66,49,0.65); margin-top: 4px; line-height: 1.45;">
           Mémorisation du Coran<br>
-          1206 jours + 6 mois de clôture
+          1808 jours + 6 mois de clôture
         </p>
       </div>
 
@@ -539,7 +539,7 @@
       </div>
       <div style="margin-bottom: 16px;">
         <label class="field-label">Jour actuel</label>
-        <input type="number" id="ob-current-day" min="1" max="1386" value="1" class="field-input">
+        <input type="number" id="ob-current-day" min="1" max="1988" value="1" class="field-input">
       </div>
 
       <button class="btn-primary" onclick="completeOnboarding()" style="width: 100%; padding: 13px;">
@@ -555,8 +555,8 @@
   // ============================================================
   // CONFIG
   // ============================================================
-  const TOTAL_MEMO = 1206;
-  const TOTAL_DAYS = 1386;
+  const TOTAL_MEMO = 1808;
+  const TOTAL_DAYS = 1988;
 
   const ICONS = {
     memo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
@@ -625,8 +625,8 @@
   function formatTask(day) {
     const d = programData[day - 1];
     if (!d || d.isClosing) return String(day);
-    if (!d.half) return String(d.mushafPage);
-    return d.mushafPage + ' ' + d.half;
+    if (!d.part) return String(d.mushafPage);
+    return d.mushafPage + ' ' + d.part;
   }
   function formatRange(s, e) {
     if (!s || !e) return '—';
@@ -652,7 +652,7 @@
     t.push({
       id: 'memo',
       label: 'Mémorisation',
-      content: 'Page ' + d.mushafPage + (d.half ? ' ' + d.half : ''),
+      content: 'Page ' + d.mushafPage + (d.part ? ' ' + d.part : ''),
       extra: d.sourate + ' · ' + (d.revelation === 'makkan' ? 'Mecque' : 'Médine') + ' · Juz ' + d.juz,
       icon: ICONS.memo,
       hasTechnique: true
@@ -719,7 +719,7 @@
       sourateHtml = 'Clôture';
       sourateCls = 'closing';
     } else {
-      pageHtml = d.mushafPage + (d.half ? '<span class="h">' + d.half + '</span>' : '');
+      pageHtml = d.mushafPage + (d.part ? '<span class="h">' + d.part + '</span>' : '');
       sourateHtml = d.sourate;
       sourateCls = d.revelation;
     }
@@ -773,7 +773,7 @@
         '<div class="ex-head"><span class="ex-day-label">Jour ' + day + ' / ' + TOTAL_DAYS + '</span>' +
           (d.tourNumber > 0 ? '<span class="ex-day-badge">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '') +
         '</div>' +
-        '<div class="ex-title">Page ' + d.mushafPage + (d.half ? '<span class="half">' + d.half + '</span>' : '') +
+        '<div class="ex-title">Page ' + d.mushafPage + (d.part ? '<span class="part">' + d.part + '</span>' : '') +
           '<span class="sep">·</span><span class="' + revelationCls + '">' + d.sourate + '</span>' +
         '</div>' +
         '<div class="ex-pills">' +
@@ -992,7 +992,7 @@
     for (const p in pd) if (pd[p].every(d => isDayComplete(d))) n++;
     return n;
   }
-  // ----- Calculs par tâche (sur tout le programme 1-1386) -----
+  // ----- Calculs par tâche (sur tout le programme 1-1988) -----
   function calcTaskStats() {
     const s = {
       memo:    { done: 0, total: 0 },
@@ -1241,22 +1241,22 @@
     const JUZ = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
     const gs = p => { let s = SURAH[0][1]; for (const [sp,n] of SURAH) { if (sp <= p) s = n; else break; } return s; };
     const gj = p => { let j = 1; for (let i = 0; i < JUZ.length; i++) { if (JUZ[i] <= p) j = i + 1; else break; } return j; };
-    const gt = d => d === 1 ? {p:1,h:null} : d === 2 ? {p:2,h:null} : {p:Math.floor((d-1)/2)+2, h:d%2===1?'m1':'m2'};
+    const gt = d => d === 1 ? {p:1,part:null} : d === 2 ? {p:2,part:null} : (function(){const i=d-3;return {p:Math.floor(i/3)+3, part:'t'+((i%3)+1)};}());
     const out = [];
-    for (let day = 1; day <= 1386; day++) {
-      if (day > 1206) {
-        const ci = day - 1206, ct = Math.floor((ci-1)/6)+1, k = ((ci-1)%6)+1, per = 1206/6;
+    for (let day = 1; day <= 1988; day++) {
+      if (day > 1808) {
+        const ci = day - 1808, ct = Math.floor((ci-1)/6)+1, k = ((ci-1)%6)+1, per = 1808/6;
         out.push({day, isClosing:true, closingTour:ct, closingDay:k, totalClosingTours:30, revisionStartDay:Math.floor((k-1)*per)+1, revisionEndDay:Math.floor(k*per)});
         continue;
       }
       const t = gt(day), sou = gs(t.p);
-      const e = {day, isClosing:false, mushafPage:t.p, half:t.h, sourate:sou, revelation:MED.has(sou)?'medinan':'makkan', juz:gj(t.p)};
+      const e = {day, isClosing:false, mushafPage:t.p, part:t.part, sourate:sou, revelation:MED.has(sou)?'medinan':'makkan', juz:gj(t.p)};
       if (day >= 3) {
         e.liaisonStartDay = day < 33 ? 1 : (6 * (Math.floor((day-33)/6)+1) + 1);
         e.liaisonEndDay = day - 2;
       } else { e.liaisonStartDay = 0; e.liaisonEndDay = 0; }
       if (day >= 33) {
-        const T = Math.floor((day-33)/6)+1, k = ((day-33)%6)+1, ttr = Math.min(6*T, 1206), per = ttr/6;
+        const T = Math.floor((day-33)/6)+1, k = ((day-33)%6)+1, ttr = Math.min(6*T, 1808), per = ttr/6;
         e.tourNumber = T; e.tourDay = k;
         e.revisionStartDay = Math.floor((k-1)*per)+1; e.revisionEndDay = Math.floor(k*per);
       } else { e.tourNumber = 0; e.tourDay = 0; e.revisionStartDay = 0; e.revisionEndDay = 0; }

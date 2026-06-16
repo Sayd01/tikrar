@@ -69,19 +69,25 @@ function getJuz(page) {
   }
   return j;
 }
+// Tâche d'un jour (page + tiers)
+// - Jour 1 : page 1 entière (Al-Fatihah)
+// - Jour 2 : page 2 entière (début Al-Baqarah)
+// - Jour N≥3 : 1/3 de page, page = floor((N-3)/3)+3, part = t1 / t2 / t3
 function getTask(day) {
-  if (day === 1) return { mushafPage: 1, half: null };
-  if (day === 2) return { mushafPage: 2, half: null };
+  if (day === 1) return { mushafPage: 1, part: null };
+  if (day === 2) return { mushafPage: 2, part: null };
+  const idx = day - 3;
   return {
-    mushafPage: Math.floor((day - 1) / 2) + 2,
-    half: day % 2 === 1 ? 'm1' : 'm2'
+    mushafPage: Math.floor(idx / 3) + 3,
+    part: 't' + ((idx % 3) + 1)
   };
 }
 
-const TOTAL_MEMO = 1206;             // 1206 jours de mémorisation
-const CLOSING_TOURS = 30;            // 30 tours de clôture (6 mois)
-const CLOSING_DAYS = CLOSING_TOURS * 6;  // 180 jours
-const TOTAL_DAYS = TOTAL_MEMO + CLOSING_DAYS;  // 1386
+// 2 pages entières + 602 pages × 3 tiers = 1808 jours de mémorisation
+const TOTAL_MEMO = 2 + (604 - 2) * 3;       // 1808
+const CLOSING_TOURS = 30;                   // 30 tours de clôture (6 mois)
+const CLOSING_DAYS = CLOSING_TOURS * 6;     // 180 jours
+const TOTAL_DAYS = TOTAL_MEMO + CLOSING_DAYS;  // 1988
 
 const program = [];
 
@@ -116,7 +122,7 @@ for (let day = 1; day <= TOTAL_DAYS; day++) {
     day,
     isClosing: false,
     mushafPage: task.mushafPage,
-    half: task.half,                           // null pour jours 1-2
+    part: task.part,                           // null pour jours 1-2, sinon 't1' / 't2' / 't3'
     sourate,
     revelation: MEDINAN.has(sourate) ? 'medinan' : 'makkan',
     juz: getJuz(task.mushafPage)

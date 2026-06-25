@@ -71,10 +71,10 @@
       border-bottom: 1px solid rgba(14,66,49,0.08);
       max-width: 640px; margin: 0 auto;
       display: grid;
-      grid-template-columns: 38px 84px 1fr 96px;
-      gap: 10px; align-items: center;
-      padding: 12px 18px 10px;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+      grid-template-columns: 32px 40px 76px 1fr 90px;
+      gap: 8px; align-items: center;
+      padding: 12px 14px 10px;
+      font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
       text-transform: uppercase; color: rgba(14,66,49,0.42);
     }
     .legend > div:last-child { text-align: right; }
@@ -85,9 +85,9 @@
 
     .row {
       display: grid;
-      grid-template-columns: 38px 84px 1fr 96px;
-      gap: 10px; align-items: center;
-      padding: 16px 18px;
+      grid-template-columns: 32px 40px 76px 1fr 90px;
+      gap: 8px; align-items: center;
+      padding: 16px 14px;
       border-bottom: 1px solid rgba(14,66,49,0.05);
       cursor: pointer;
       background: white;
@@ -104,8 +104,12 @@
       font-size: 11px; color: rgba(14,66,49,0.48); font-weight: 600;
       font-variant-numeric: tabular-nums;
     }
+    .row .page {
+      font-size: 14px; font-weight: 800; color: #0E4231;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+    }
     .row .verses {
-      font-size: 13px; font-weight: 700; color: #0E4231;
+      font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.78);
       font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
@@ -1192,6 +1196,7 @@
       </div>
       <div class="legend">
         <div>Jour</div>
+        <div>Page</div>
         <div>Versets</div>
         <div>Sourate</div>
         <div>M · L · R</div>
@@ -2029,12 +2034,14 @@
     const done = isDayComplete(day);
     const partial = !done && isDayPartial(day);
 
-    let versesHtml, sourateHtml, sourateCls;
+    let pageHtml, versesHtml, sourateHtml, sourateCls;
     if (d.isClosing) {
+      pageHtml = '<span class="tabular" style="font-size:12px;color:#946930;">—</span>';
       versesHtml = '<span class="tabular">T' + d.closingTour + '·J' + d.closingDay + '</span>';
       sourateHtml = 'Clôture';
       sourateCls = 'closing';
     } else {
+      pageHtml = '<span class="tabular">' + d.mushafPage + '</span>';
       // Affiche les versets du jour (chunk primaire = 1ère sourate)
       const chunk = d.verses && d.verses[0];
       let vTxt;
@@ -2043,7 +2050,7 @@
         if (d.longVerse) vTxt += ' (' + d.longVerse.part + '/' + d.longVerse.of + ')';
         if (d.verses.length > 1) vTxt += '…';   // multi-sourate (rare)
       } else {
-        vTxt = 'p.' + d.mushafPage;
+        vTxt = '—';
       }
       versesHtml = '<span class="tabular">' + vTxt + '</span>';
       sourateHtml = d.sourate;
@@ -2075,6 +2082,7 @@
 
     return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setDayFromCarnet(' + day + ')">' +
       '<div class="day">' + day + '</div>' +
+      '<div class="page">' + pageHtml + '</div>' +
       '<div class="verses">' + versesHtml + '</div>' +
       '<div class="sourate ' + sourateCls + '">' + sourateHtml + '</div>' +
       '<div class="dots">' + dotsHtml + '</div>' +

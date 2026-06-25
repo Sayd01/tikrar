@@ -71,7 +71,7 @@
       border-bottom: 1px solid rgba(14,66,49,0.08);
       max-width: 640px; margin: 0 auto;
       display: grid;
-      grid-template-columns: 38px 64px 1fr 96px;
+      grid-template-columns: 38px 84px 1fr 96px;
       gap: 10px; align-items: center;
       padding: 12px 18px 10px;
       font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
@@ -85,7 +85,7 @@
 
     .row {
       display: grid;
-      grid-template-columns: 38px 64px 1fr 96px;
+      grid-template-columns: 38px 84px 1fr 96px;
       gap: 10px; align-items: center;
       padding: 16px 18px;
       border-bottom: 1px solid rgba(14,66,49,0.05);
@@ -104,11 +104,11 @@
       font-size: 11px; color: rgba(14,66,49,0.48); font-weight: 600;
       font-variant-numeric: tabular-nums;
     }
-    .row .page {
-      font-size: 14px; font-weight: 800; color: #0E4231;
-      font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+    .row .verses {
+      font-size: 13px; font-weight: 700; color: #0E4231;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .row .page .h { font-size: 11px; color: #B98947; margin-left: 2px; font-weight: 700; }
     .row .sourate {
       font-size: 12px; font-weight: 600;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -151,10 +151,10 @@
       padding-left: 13px;
     }
     .row.current-day .day { color: #15573B; font-weight: 800; }
-    .row.current-day .page { color: #073026; }
+    .row.current-day .verses { color: #073026; }
     body.eve .row.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.25), rgba(48,138,96,0.08)) !important; }
     body.eve .row.current-day .day { color: #7CC09B; }
-    body.eve .row.current-day .page { color: #E5F2EA; }
+    body.eve .row.current-day .verses { color: #E5F2EA; }
 
     /* ===== EXPANDED ROW (legacy, conservé non utilisé) ===== */
     .row.expanded {
@@ -1192,7 +1192,7 @@
       </div>
       <div class="legend">
         <div>Jour</div>
-        <div>Page</div>
+        <div>Versets</div>
         <div>Sourate</div>
         <div>M · L · R</div>
       </div>
@@ -2031,13 +2031,23 @@
     const done = isDayComplete(day);
     const partial = !done && isDayPartial(day);
 
-    let pageHtml, sourateHtml, sourateCls;
+    let versesHtml, sourateHtml, sourateCls;
     if (d.isClosing) {
-      pageHtml = '<span class="tabular">T' + d.closingTour + '·' + d.closingDay + '</span>';
+      versesHtml = '<span class="tabular">T' + d.closingTour + '·J' + d.closingDay + '</span>';
       sourateHtml = 'Clôture';
       sourateCls = 'closing';
     } else {
-      pageHtml = d.mushafPage;
+      // Affiche les versets du jour (chunk primaire = 1ère sourate)
+      const chunk = d.verses && d.verses[0];
+      let vTxt;
+      if (chunk) {
+        vTxt = chunk.f === chunk.t ? String(chunk.f) : (chunk.f + '–' + chunk.t);
+        if (d.longVerse) vTxt += ' (' + d.longVerse.part + '/' + d.longVerse.of + ')';
+        if (d.verses.length > 1) vTxt += '…';   // multi-sourate (rare)
+      } else {
+        vTxt = 'p.' + d.mushafPage;
+      }
+      versesHtml = '<span class="tabular">' + vTxt + '</span>';
       sourateHtml = d.sourate;
       sourateCls = d.revelation;
     }
@@ -2067,7 +2077,7 @@
 
     return '<div class="' + cls + '" id="row-' + day + '" data-day="' + day + '" onclick="setDayFromCarnet(' + day + ')">' +
       '<div class="day">' + day + '</div>' +
-      '<div class="page">' + pageHtml + '</div>' +
+      '<div class="verses">' + versesHtml + '</div>' +
       '<div class="sourate ' + sourateCls + '">' + sourateHtml + '</div>' +
       '<div class="dots">' + dotsHtml + '</div>' +
     '</div>';

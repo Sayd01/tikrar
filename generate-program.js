@@ -156,113 +156,156 @@ allKeys.forEach(k => {
 });
 
 const memoDays = [];
-let cur = { verses: [], uniqueLines: new Set(), pages: new Set() };
 
+// ────────────────────────────────────────────────────────────────
 // CAS SPÉCIAL : Al-Fatihah (sourate 1) = TOUTE la sourate en 1 seul jour
-// (récitée intégralement à chaque prière, mémorisée comme bloc indivisible)
+// ────────────────────────────────────────────────────────────────
 const fatihaVerses = orderedVerses.filter(v => v.s === 1);
 if (fatihaVerses.length > 0) {
-  // Compter lignes uniques (versets adjacents partagent souvent une ligne)
   const fatihaLineSet = new Set();
   fatihaVerses.forEach(v => v.lineKeys.forEach(k => fatihaLineSet.add(k)));
-  const fatihaPages = [...new Set(fatihaVerses.map(v => v.page))].sort((a,b) => a-b);
   memoDays.push({
     verses: [{ s: 1, f: 1, t: fatihaVerses[fatihaVerses.length - 1].a }],
-    pages: fatihaPages,
-    primaryPage: fatihaVerses[0].page,
+    pages: [1],
+    primaryPage: 1,
     primarySurah: 1,
     primarySourate: 'Al-Fatihah',
     revelation: 'makkan',
     juz: 1,
     nLines: fatihaLineSet.size,
-    wholeSurah: true   // marker
+    wholeSurah: true
   });
 }
 
-function flushDay() {
-  if (cur.verses.length === 0) return;
-  // Construire chunks consécutifs par sourate
-  const chunks = [];
-  cur.verses.forEach(v => {
-    const last = chunks[chunks.length - 1];
-    if (last && last.s === v.s && last.t + 1 === v.a) last.t = v.a;
-    else chunks.push({ s: v.s, f: v.a, t: v.a });
-  });
-  const pages = [...cur.pages].sort((a, b) => a - b);
-  const primary = cur.verses[0];
-  memoDays.push({
-    verses: chunks,
-    pages,
-    primaryPage: primary.page,
-    primarySurah: primary.s,
-    primarySourate: getSurahName(primary.s),
-    revelation: isMedinan(primary.s) ? 'medinan' : 'makkan',
-    juz: getJuz(primary.page),
-    nLines: cur.uniqueLines.size   // LIGNES UNIQUES (correct)
-  });
-  cur = { verses: [], uniqueLines: new Set(), pages: new Set() };
-}
+// ────────────────────────────────────────────────────────────────
+// ALGO PER-PAGE avec PARTITION DP optimale
+// Pour chaque page : trouve la partition minimisant la déviation
+// quadratique au target 4 lignes/jour. Pas d'orphelins, équilibré.
+// ────────────────────────────────────────────────────────────────
 
+// Grouper versets par page (en sautant Al-Fatihah déjà traitée)
+const versesByPage = {};
 for (const v of orderedVerses) {
-  if (v.s === 1) continue;  // Al-Fatihah déjà traité en cas spécial ci-dessus
-
-  // RÈGLE FONDAMENTALE : 1 jour = 1 page max
-  // Le Mushaf Madinah est conçu page par page pour le hifz. Une page = repère visuel.
-  // On force le flush dès qu'on change de page.
-  const crossesPage = cur.verses.length > 0 && cur.verses[0].page !== v.page;
-  if (crossesPage) {
-    flushDay();
-  }
-
-  if (v.nLines > MAX_LINES_PER_DAY) {
-    // Verset très long (> 6 lignes) → split sur plusieurs jours dédiés
-    flushDay();
-    const numDays = Math.ceil(v.nLines / LINES_PER_DAY);
-    for (let i = 0; i < numDays; i++) {
-      const linesThisDay = (i === numDays - 1)
-        ? v.nLines - (numDays - 1) * LINES_PER_DAY
-        : LINES_PER_DAY;
-      memoDays.push({
-        verses: [{ s: v.s, f: v.a, t: v.a }],
-        pages: [v.page],
-        primaryPage: v.page,
-        primarySurah: v.s,
-        primarySourate: getSurahName(v.s),
-        revelation: isMedinan(v.s) ? 'medinan' : 'makkan',
-        juz: getJuz(v.page),
-        nLines: linesThisDay,
-        longVerse: { part: i + 1, of: numDays }  // « partie X / N »
-      });
-    }
-    continue;
-  }
-
-  // Verset substantiel (≥ 4 lignes) → 1 jour dédié (seul)
-  if (v.nLines >= SOLO_VERSE_THRESHOLD) {
-    flushDay();
-    cur.verses.push(v);
-    v.lineKeys.forEach(k => cur.uniqueLines.add(k));
-    cur.pages.add(v.page);
-    flushDay();
-    continue;
-  }
-
-  // Verset court (< 4 lignes) : tente d'ajouter au jour courant si tolérance OK
-  // Tolérance : on compte les LIGNES UNIQUES (versets partagent souvent une ligne)
-  // On accepte tant que le total de lignes uniques reste <= MAX_LINES_PER_DAY (6)
-  const projected = new Set(cur.uniqueLines);
-  v.lineKeys.forEach(k => projected.add(k));
-  if (projected.size > MAX_LINES_PER_DAY && cur.verses.length > 0) {
-    flushDay();
-    // Recommencer le set sur ce nouveau jour
-    v.lineKeys.forEach(k => cur.uniqueLines.add(k));
-  } else {
-    cur.uniqueLines = projected;
-  }
-  cur.verses.push(v);
-  cur.pages.add(v.page);
+  if (v.s === 1) continue;
+  if (!versesByPage[v.page]) versesByPage[v.page] = [];
+  versesByPage[v.page].push(v);
 }
-flushDay();
+
+// DP : partition optimale d'une liste de versets courts/moyens (≤ MAX_LINES)
+// Coût d'un groupe = (nLines - LINES_PER_DAY)²
+// Coût total minimisé = répartition la plus proche du target sans orphelins
+function dpPartition(verses) {
+  const n = verses.length;
+  if (n === 0) return [];
+
+  // uniqueLines(j, i) = nb lignes uniques du sous-ensemble [j..i-1]
+  const uniqueLines = (j, i) => {
+    const s = new Set();
+    for (let k = j; k < i; k++) verses[k].lineKeys.forEach(lk => s.add(lk));
+    return s.size;
+  };
+
+  // dp[i] = { cost, prev } : coût min pour partitionner verses[0..i-1]
+  const dp = new Array(n + 1).fill(null);
+  dp[0] = { cost: 0, prev: -1 };
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = i - 1; j >= 0; j--) {
+      const lines = uniqueLines(j, i);
+      if (lines > MAX_LINES_PER_DAY) break;   // groupe trop grand, et tout groupe plus large sera pire
+      const dev = lines - LINES_PER_DAY;
+      const groupCost = dev * dev;
+      const total = dp[j].cost + groupCost;
+      if (dp[i] === null || total < dp[i].cost) {
+        dp[i] = { cost: total, prev: j };
+      }
+    }
+  }
+
+  // Reconstruction
+  const groups = [];
+  let i = n;
+  while (i > 0) {
+    const j = dp[i].prev;
+    const groupVerses = verses.slice(j, i);
+    const lineSet = new Set();
+    groupVerses.forEach(v => v.lineKeys.forEach(lk => lineSet.add(lk)));
+    groups.unshift({ verses: groupVerses, nLines: lineSet.size });
+    i = j;
+  }
+  return groups;
+}
+
+// Planifier une page : versets longs (>MAX) en jours dédiés, le reste via DP
+function planPage(pageNum, verses) {
+  const days = [];
+  let buffer = [];
+
+  function flushBuffer() {
+    if (buffer.length === 0) return;
+    const subgroups = dpPartition(buffer);
+    subgroups.forEach(g => {
+      days.push({
+        verses: g.verses,
+        nLines: g.nLines,
+        page: pageNum
+      });
+    });
+    buffer = [];
+  }
+
+  for (const v of verses) {
+    if (v.nLines > MAX_LINES_PER_DAY) {
+      // Verset très long : flush buffer + jours dédiés
+      flushBuffer();
+      const numDays = Math.ceil(v.nLines / LINES_PER_DAY);
+      for (let d = 0; d < numDays; d++) {
+        const linesThisDay = (d === numDays - 1)
+          ? v.nLines - (numDays - 1) * LINES_PER_DAY
+          : LINES_PER_DAY;
+        days.push({
+          verses: [v],
+          nLines: linesThisDay,
+          page: pageNum,
+          longVerse: { part: d + 1, of: numDays }
+        });
+      }
+    } else {
+      buffer.push(v);
+    }
+  }
+  flushBuffer();
+
+  return days;
+}
+
+// Itérer sur les pages dans l'ordre
+const pageNums = Object.keys(versesByPage).map(Number).sort((a, b) => a - b);
+for (const pageNum of pageNums) {
+  const dayPlans = planPage(pageNum, versesByPage[pageNum]);
+  dayPlans.forEach(dp => {
+    // Construire chunks consécutifs par sourate
+    const chunks = [];
+    dp.verses.forEach(v => {
+      const last = chunks[chunks.length - 1];
+      if (last && last.s === v.s && last.t + 1 === v.a) last.t = v.a;
+      else chunks.push({ s: v.s, f: v.a, t: v.a });
+    });
+    const primary = dp.verses[0];
+    const day = {
+      verses: chunks,
+      pages: [pageNum],
+      primaryPage: pageNum,
+      primarySurah: primary.s,
+      primarySourate: getSurahName(primary.s),
+      revelation: isMedinan(primary.s) ? 'medinan' : 'makkan',
+      juz: getJuz(pageNum),
+      nLines: dp.nLines
+    };
+    if (dp.longVerse) day.longVerse = dp.longVerse;
+    memoDays.push(day);
+  });
+}
 
 // Renuméroter les jours
 memoDays.forEach((d, i) => { d.day = i + 1; });

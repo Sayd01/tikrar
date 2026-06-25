@@ -134,6 +134,8 @@ console.log(`Lignes uniques (Mushaf Madinah) : ${sortedLines.length}`);
 // - Verset entier respecté : jamais coupé entre 2 jours sauf si > 4 lignes
 
 // Construire ordre canonique des versets avec leur metadata
+// IMPORTANT : on garde les lignes RÉELLES (page:line) pour pouvoir compter les LIGNES UNIQUES
+// (versets adjacents partagent souvent une ligne — exemple : 2:1 finit ligne 3, 2:2 commence ligne 3)
 const orderedVerses = [];
 const allKeys = Object.keys(versesRaw).sort((A, B) => {
   const [sa, aa] = A.split(':').map(Number);
@@ -143,22 +145,25 @@ const allKeys = Object.keys(versesRaw).sort((A, B) => {
 allKeys.forEach(k => {
   const [s, a] = k.split(':').map(Number);
   const v = versesRaw[k];
+  const lineKeys = v.lines.map(l => `${v.page}:${l.line}`);
   orderedVerses.push({
     s, a,
     page: v.page,
-    nLines: v.lines.length,
-    firstLine: v.lines[0].line
+    nLines: v.lines.length,           // # lignes occupées (avec partage potentiel)
+    lineKeys                            // ["page:line", ...] pour calcul unique
   });
 });
 
 const memoDays = [];
-let cur = { verses: [], lines: 0, pages: new Set() };
+let cur = { verses: [], uniqueLines: new Set(), pages: new Set() };
 
 // CAS SPÉCIAL : Al-Fatihah (sourate 1) = TOUTE la sourate en 1 seul jour
 // (récitée intégralement à chaque prière, mémorisée comme bloc indivisible)
 const fatihaVerses = orderedVerses.filter(v => v.s === 1);
 if (fatihaVerses.length > 0) {
-  const fatihaLines = fatihaVerses.reduce((sum, v) => sum + v.nLines, 0);
+  // Compter lignes uniques (versets adjacents partagent souvent une ligne)
+  const fatihaLineSet = new Set();
+  fatihaVerses.forEach(v => v.lineKeys.forEach(k => fatihaLineSet.add(k)));
   const fatihaPages = [...new Set(fatihaVerses.map(v => v.page))].sort((a,b) => a-b);
   memoDays.push({
     verses: [{ s: 1, f: 1, t: fatihaVerses[fatihaVerses.length - 1].a }],
@@ -168,7 +173,7 @@ if (fatihaVerses.length > 0) {
     primarySourate: 'Al-Fatihah',
     revelation: 'makkan',
     juz: 1,
-    nLines: fatihaLines,
+    nLines: fatihaLineSet.size,
     wholeSurah: true   // marker
   });
 }
@@ -192,9 +197,9 @@ function flushDay() {
     primarySourate: getSurahName(primary.s),
     revelation: isMedinan(primary.s) ? 'medinan' : 'makkan',
     juz: getJuz(primary.page),
-    nLines: cur.lines
+    nLines: cur.uniqueLines.size   // LIGNES UNIQUES (correct)
   });
-  cur = { verses: [], lines: 0, pages: new Set() };
+  cur = { verses: [], uniqueLines: new Set(), pages: new Set() };
 }
 
 for (const v of orderedVerses) {
@@ -224,12 +229,18 @@ for (const v of orderedVerses) {
   }
 
   // Verset court/moyen : tente d'ajouter au jour courant si tolérance OK
-  // Tolérance : on ajoute tant que le total reste <= MAX_LINES_PER_DAY (6)
-  if (cur.lines + v.nLines > MAX_LINES_PER_DAY && cur.verses.length > 0) {
+  // Tolérance : on compte les LIGNES UNIQUES (versets partagent souvent une ligne)
+  // On accepte tant que le total de lignes uniques reste <= MAX_LINES_PER_DAY (6)
+  const projected = new Set(cur.uniqueLines);
+  v.lineKeys.forEach(k => projected.add(k));
+  if (projected.size > MAX_LINES_PER_DAY && cur.verses.length > 0) {
     flushDay();
+    // Recommencer le set sur ce nouveau jour
+    v.lineKeys.forEach(k => cur.uniqueLines.add(k));
+  } else {
+    cur.uniqueLines = projected;
   }
   cur.verses.push(v);
-  cur.lines += v.nLines;
   cur.pages.add(v.page);
 }
 flushDay();

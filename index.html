@@ -763,14 +763,45 @@
     .sou-day-mark.partial { color: #B98947; }
     .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.08), rgba(48,138,96,0.02)); border-color: rgba(48,138,96,0.15); }
     body.eve .sou-hero { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); box-shadow: none; }
-    body.eve .sou-progress .pct { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-color: transparent; }
+    body.eve .sou-progress { color: rgba(255,255,255,0.85); }
+    body.eve .sou-progress .pct { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border-color: transparent; }
+    body.eve .sou-bar { background: rgba(255,255,255,0.06); box-shadow: none; }
+    body.eve .sou-section-title { color: rgba(255,255,255,0.55); }
     body.eve .sou-day { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); }
     body.eve .sou-day:hover { background: rgba(255,255,255,0.04); box-shadow: none; }
+    body.eve .sou-day-mark { color: rgba(255,255,255,0.35); }
+    body.eve .sou-day-mark.done { color: #7CC09B; }
+    body.eve .sou-day-mark.partial { color: #D4A574; }
+    body.eve .sou-day.current-day { background: linear-gradient(90deg, rgba(48,138,96,0.18), rgba(48,138,96,0.04)); border-color: rgba(48,138,96,0.3); }
     body.eve .sou-month-head { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.1); }
+    body.eve .sou-month-head .count { color: rgba(255,255,255,0.45); }
     body.eve .sou-day-date { color: rgba(255,255,255,0.5); }
     body.eve .sou-name { color: #FCF7EB; }
+    body.eve .sou-name.makkan { color: #D4A574; }
+    body.eve .sou-name.medinan { color: #7CC09B; }
     body.eve .sou-day-page { color: #E5F2EA; }
     body.eve .sou-day-verses { color: rgba(255,255,255,0.65); }
+    body.eve .sou-err-empty { color: rgba(255,255,255,0.5); }
+
+    /* Topbar (bouton retour + titre "Sourate") */
+    .sou-topbar { display:flex; align-items:center; gap:10px; margin-bottom: 8px; }
+    .sou-back {
+      background:rgba(14,66,49,0.06); border:none; width:32px; height:32px;
+      border-radius:999px; color:#1A1F2C; cursor:pointer; font-size:18px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .sou-back-title { font-size:14px; opacity:0.6; margin: 0; }
+    body.eve .sou-back { background: rgba(255,255,255,0.08); color: #F8ECCC; }
+    body.eve .sou-back-title { color: rgba(255,255,255,0.7); }
+
+    /* Tags à droite des section-titles */
+    .sou-section-tag {
+      float:right; letter-spacing:0; text-transform:none;
+      color: rgba(14,66,49,0.6); font-weight: 600;
+    }
+    .sou-section-tag.err { color: #92400E; font-weight: 800; }
+    body.eve .sou-section-tag { color: rgba(255,255,255,0.55); }
+    body.eve .sou-section-tag.err { color: #FCD34D; }
 
     .sou-err-chip {
       display: inline-flex; align-items: center; gap: 6px;
@@ -1219,9 +1250,9 @@
   <!-- ============ MODAL : détail d'une sourate (z-index élevé pour passer au-dessus de stats) ============ -->
   <div id="modal-sourate" class="modal-overlay" style="z-index: 56;" onclick="if(event.target===this)closeModal('modal-sourate')">
     <div class="modal-sheet">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom: 8px;">
-        <button onclick="closeModal('modal-sourate')" aria-label="Retour" style="background:rgba(14,66,49,0.06); border:none; width:32px; height:32px; border-radius:999px; color:#1A1F2C; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">‹</button>
-        <h2 class="modal-title" style="font-size:14px; opacity:0.6; margin: 0;">Sourate</h2>
+      <div class="sou-topbar">
+        <button class="sou-back" onclick="closeModal('modal-sourate')" aria-label="Retour">‹</button>
+        <h2 class="modal-title sou-back-title">Sourate</h2>
       </div>
       <div class="sou-hero">
         <div class="sou-name" id="sou-name">—</div>
@@ -1229,9 +1260,9 @@
         <div class="sou-progress"><span id="sou-done">0</span> / <span id="sou-total">0</span> versets <span class="pct" id="sou-pct">0%</span></div>
         <div class="sou-bar"><div class="sou-bar-fill" id="sou-bar-fill" style="width:0%"></div></div>
       </div>
-      <div class="sou-section-title">Versets difficiles <span id="sou-err-count" style="float:right; color:#92400E; letter-spacing:0; text-transform:none;">0</span></div>
+      <div class="sou-section-title">Versets difficiles <span class="sou-section-tag err" id="sou-err-count">0</span></div>
       <div id="sou-errs"></div>
-      <div class="sou-section-title">Jours qui contiennent cette sourate <span style="float:right; color:rgba(14,66,49,0.6); letter-spacing:0; text-transform:none;"><span id="sou-months-count">0</span> mois • <span id="sou-days-count">0</span> jours</span></div>
+      <div class="sou-section-title">Jours qui contiennent cette sourate <span class="sou-section-tag"><span id="sou-months-count">0</span> mois • <span id="sou-days-count">0</span> jours</span></div>
       <div id="sou-days-list"></div>
     </div>
   </div>

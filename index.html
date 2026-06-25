@@ -2670,19 +2670,25 @@
 
   // ===== G4 : Stats par sourate =====
   function calculateSurahStats() {
-    const stats = {};
-    for (let s = 1; s <= 114; s++) stats[s] = { done: 0, total: 0 };
+    // Compte les versets UNIQUES (évite doublons : verset long splitté sur N jours)
+    const totalSets = {}, doneSets = {};
+    for (let s = 1; s <= 114; s++) { totalSets[s] = new Set(); doneSets[s] = new Set(); }
     programData.forEach(d => {
       if (d.isClosing) return;
       const verses = getVersesForDay(d);
       if (!verses) return;
       const isDone = isDayComplete(d.day);
       verses.forEach(c => {
-        const n = c.t - c.f + 1;
-        stats[c.s].total += n;
-        if (isDone) stats[c.s].done += n;
+        for (let a = c.f; a <= c.t; a++) {
+          totalSets[c.s].add(a);
+          if (isDone) doneSets[c.s].add(a);
+        }
       });
     });
+    const stats = {};
+    for (let s = 1; s <= 114; s++) {
+      stats[s] = { done: doneSets[s].size, total: totalSets[s].size };
+    }
     return stats;
   }
   function renderSurahList(filter) {
@@ -2893,15 +2899,20 @@
       }).join('');
     }
 
-    // Liste des jours — groupés par mois calendaire si startDate set
+    // Liste des jours — projection ANCRÉE SUR AUJOURD'HUI (currentDay = today)
+    // → reflète le rythme RÉEL de l'utilisateur (s'il est en avance/retard sur startDate,
+    //   les dates futures s'ajustent automatiquement)
     const daysListEl = document.getElementById('sou-days-list');
     document.getElementById('sou-days-count').textContent = days.length;
-    const sd = localStorage.getItem('tikrar:startDate');
-    const startTime = sd ? new Date(sd + 'T00:00:00').getTime() : null;
-    const hasDate = startTime && !isNaN(startTime);
+    const todayMs = (() => { const t = new Date(); t.setHours(0,0,0,0); return t.getTime(); })();
     const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-    document.getElementById('sou-months-count').style.display = hasDate ? 'inline' : 'none';
-    document.getElementById('sou-months-count').nextSibling.textContent = hasDate ? ' mois • ' : '';
+    document.getElementById('sou-months-count').style.display = 'inline';
+    document.getElementById('sou-months-count').nextSibling.textContent = ' mois • ';
+
+    // Projection : day D → today + (D - currentDay) jours
+    function dateForDay(progDay) {
+      return new Date(todayMs + (progDay - currentDay) * 86400000);
+    }
 
     function renderDayRow(item) {
       const dd = item.day, isDone = isDayComplete(dd.day), isPart = !isDone && isDayPartial(dd.day);
@@ -2909,13 +2920,8 @@
       const versesStr = item.chunks.map(c => 'v' + (c.f === c.t ? c.f : c.f + '-' + c.t)).join(', ');
       const pageStr = 'Page ' + dd.mushafPage;
       const currentCls = dd.day === currentDay ? ' current-day' : '';
-      let dateLabel;
-      if (hasDate) {
-        const dt = new Date(startTime + (dd.day - 1) * 86400000);
-        dateLabel = dt.getDate() + ' ' + MONTHS[dt.getMonth()].slice(0, 3) + '.';
-      } else {
-        dateLabel = 'J' + dd.day;
-      }
+      const dt = dateForDay(dd.day);
+      const dateLabel = dt.getDate() + ' ' + MONTHS[dt.getMonth()].slice(0, 3) + '.';
       return '<div class="sou-day' + currentCls + '" onclick="setActiveDay(' + dd.day + ');closeModal(\'modal-sourate\');closeModal(\'modal-stats\');">' +
         '<div class="sou-day-date">' + dateLabel + '</div>' +
         '<div class="sou-day-page">' + pageStr + '</div>' +
@@ -2924,12 +2930,12 @@
       '</div>';
     }
 
-    if (hasDate && days.length > 0) {
-      // Grouper par mois calendaire
+    if (days.length > 0) {
+      // Grouper par mois calendaire (projection)
       const groups = {};
       const order = [];
       days.forEach(item => {
-        const dt = new Date(startTime + (item.day.day - 1) * 86400000);
+        const dt = dateForDay(item.day.day);
         const key = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
         if (!groups[key]) { groups[key] = []; order.push(key); }
         groups[key].push(item);
@@ -2947,7 +2953,7 @@
       daysListEl.innerHTML = html;
     } else {
       document.getElementById('sou-months-count').textContent = '0';
-      daysListEl.innerHTML = days.map(renderDayRow).join('');
+      daysListEl.innerHTML = '';
     }
 
     document.getElementById('modal-sourate').classList.add('open');

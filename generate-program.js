@@ -205,6 +205,14 @@ function flushDay() {
 for (const v of orderedVerses) {
   if (v.s === 1) continue;  // Al-Fatihah déjà traité en cas spécial ci-dessus
 
+  // RÈGLE FONDAMENTALE : 1 jour = 1 page max
+  // Le Mushaf Madinah est conçu page par page pour le hifz. Une page = repère visuel.
+  // On force le flush dès qu'on change de page.
+  const crossesPage = cur.verses.length > 0 && cur.verses[0].page !== v.page;
+  if (crossesPage) {
+    flushDay();
+  }
+
   if (v.nLines > MAX_LINES_PER_DAY) {
     // Verset long → ferme le jour courant, dédie ceil(n/4) jours
     flushDay();

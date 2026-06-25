@@ -154,6 +154,25 @@ allKeys.forEach(k => {
 const memoDays = [];
 let cur = { verses: [], lines: 0, pages: new Set() };
 
+// CAS SPÉCIAL : Al-Fatihah (sourate 1) = TOUTE la sourate en 1 seul jour
+// (récitée intégralement à chaque prière, mémorisée comme bloc indivisible)
+const fatihaVerses = orderedVerses.filter(v => v.s === 1);
+if (fatihaVerses.length > 0) {
+  const fatihaLines = fatihaVerses.reduce((sum, v) => sum + v.nLines, 0);
+  const fatihaPages = [...new Set(fatihaVerses.map(v => v.page))].sort((a,b) => a-b);
+  memoDays.push({
+    verses: [{ s: 1, f: 1, t: fatihaVerses[fatihaVerses.length - 1].a }],
+    pages: fatihaPages,
+    primaryPage: fatihaVerses[0].page,
+    primarySurah: 1,
+    primarySourate: 'Al-Fatihah',
+    revelation: 'makkan',
+    juz: 1,
+    nLines: fatihaLines,
+    wholeSurah: true   // marker
+  });
+}
+
 function flushDay() {
   if (cur.verses.length === 0) return;
   // Construire chunks consécutifs par sourate
@@ -179,6 +198,8 @@ function flushDay() {
 }
 
 for (const v of orderedVerses) {
+  if (v.s === 1) continue;  // Al-Fatihah déjà traité en cas spécial ci-dessus
+
   if (v.nLines > MAX_LINES_PER_DAY) {
     // Verset long → ferme le jour courant, dédie ceil(n/4) jours
     flushDay();
@@ -245,6 +266,7 @@ memoDays.forEach((md, idx) => {
     nLines: md.nLines
   };
   if (md.longVerse) entry.longVerse = md.longVerse;  // verset long split sur N jours
+  if (md.wholeSurah) entry.wholeSurah = true;        // sourate entière en 1 jour (Al-Fatihah)
 
   // ── Liaison (Rabt) : jours 3+, fenêtre glissante par tour ──
   if (day >= 3) {

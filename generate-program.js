@@ -14,7 +14,8 @@
 
 const fs = require('fs');
 
-const LINES_PER_DAY = 4;
+const LINES_PER_DAY = 4;          // cible quotidienne
+const MAX_LINES_PER_DAY = 6;      // tolérance haute (pour grouper versets entiers)
 const CLOSING_TOURS = 30;
 const CLOSING_DAYS = CLOSING_TOURS * 6;   // 180 jours
 
@@ -124,60 +125,96 @@ const sortedLines = [...linesMap.values()].sort((A, B) => {
 console.log(`Lignes uniques (Mushaf Madinah) : ${sortedLines.length}`);
 
 // ────────────────────────────────────────────────────────────────
-// ALGO : grouper en paquets de 4 lignes consécutives → 1 jour
+// ALGO V2 : par VERSET (chaque verset = 1 seul jour, pas de doublon)
 // ────────────────────────────────────────────────────────────────
+// - On parcourt les versets en ordre canonique (1:1 → 114:6)
+// - On accumule jusqu'à atteindre ~4 lignes
+// - Verset > 4 lignes (rare, ex 2:282) → ceil(n/4) jours dédiés avec
+//   metadata « part X / total » pour indiquer la portion
+// - Verset entier respecté : jamais coupé entre 2 jours sauf si > 4 lignes
+
+// Construire ordre canonique des versets avec leur metadata
+const orderedVerses = [];
+const allKeys = Object.keys(versesRaw).sort((A, B) => {
+  const [sa, aa] = A.split(':').map(Number);
+  const [sb, ab] = B.split(':').map(Number);
+  return sa - sb || aa - ab;
+});
+allKeys.forEach(k => {
+  const [s, a] = k.split(':').map(Number);
+  const v = versesRaw[k];
+  orderedVerses.push({
+    s, a,
+    page: v.page,
+    nLines: v.lines.length,
+    firstLine: v.lines[0].line
+  });
+});
 
 const memoDays = [];
-for (let i = 0; i < sortedLines.length; i += LINES_PER_DAY) {
-  const chunk = sortedLines.slice(i, i + LINES_PER_DAY);
+let cur = { verses: [], lines: 0, pages: new Set() };
 
-  // Collecter les versets uniques touchés
-  const versesTouched = new Set();
-  chunk.forEach(l => l.verses.forEach(k => versesTouched.add(k)));
-
-  // Trier les versets en ordre canonique
-  const sortedVerseKeys = [...versesTouched].sort((A, B) => {
-    const [sa, aa] = A.split(':').map(Number);
-    const [sb, ab] = B.split(':').map(Number);
-    return sa - sb || aa - ab;
+function flushDay() {
+  if (cur.verses.length === 0) return;
+  // Construire chunks consécutifs par sourate
+  const chunks = [];
+  cur.verses.forEach(v => {
+    const last = chunks[chunks.length - 1];
+    if (last && last.s === v.s && last.t + 1 === v.a) last.t = v.a;
+    else chunks.push({ s: v.s, f: v.a, t: v.a });
   });
-
-  // Construire les chunks par sourate (groupes consécutifs)
-  const verseChunks = [];
-  sortedVerseKeys.forEach(k => {
-    const [s, a] = k.split(':').map(Number);
-    const last = verseChunks[verseChunks.length - 1];
-    if (last && last.s === s && last.t + 1 === a) {
-      last.t = a;
-    } else {
-      verseChunks.push({ s, f: a, t: a });
-    }
-  });
-
-  // Pages couvertes par le jour
-  const pages = [...new Set(chunk.map(l => l.page))].sort((a, b) => a - b);
-  const primaryPage = chunk[0].page;
-
-  // Sourate primaire = celle du premier verset
-  const firstVerse = sortedVerseKeys[0].split(':');
-  const primarySurah = parseInt(firstVerse[0]);
-  const primaryAyah = parseInt(firstVerse[1]);
-
-  // Lignes occupées (pour debug)
-  const lineLabels = chunk.map(l => `${l.page}:${l.line}`);
-
+  const pages = [...cur.pages].sort((a, b) => a - b);
+  const primary = cur.verses[0];
   memoDays.push({
-    verses: verseChunks,
+    verses: chunks,
     pages,
-    primaryPage,
-    primarySurah,
-    primarySourate: getSurahName(primarySurah),
-    revelation: isMedinan(primarySurah) ? 'medinan' : 'makkan',
-    juz: getJuz(primaryPage),
-    nLines: chunk.length,
-    lineLabels  // debug/info, on l'enlèvera si trop gros
+    primaryPage: primary.page,
+    primarySurah: primary.s,
+    primarySourate: getSurahName(primary.s),
+    revelation: isMedinan(primary.s) ? 'medinan' : 'makkan',
+    juz: getJuz(primary.page),
+    nLines: cur.lines
   });
+  cur = { verses: [], lines: 0, pages: new Set() };
 }
+
+for (const v of orderedVerses) {
+  if (v.nLines > MAX_LINES_PER_DAY) {
+    // Verset long → ferme le jour courant, dédie ceil(n/4) jours
+    flushDay();
+    const numDays = Math.ceil(v.nLines / LINES_PER_DAY);
+    for (let i = 0; i < numDays; i++) {
+      const linesThisDay = (i === numDays - 1)
+        ? v.nLines - (numDays - 1) * LINES_PER_DAY
+        : LINES_PER_DAY;
+      memoDays.push({
+        verses: [{ s: v.s, f: v.a, t: v.a }],
+        pages: [v.page],
+        primaryPage: v.page,
+        primarySurah: v.s,
+        primarySourate: getSurahName(v.s),
+        revelation: isMedinan(v.s) ? 'medinan' : 'makkan',
+        juz: getJuz(v.page),
+        nLines: linesThisDay,
+        longVerse: { part: i + 1, of: numDays }  // « partie X / N »
+      });
+    }
+    continue;
+  }
+
+  // Verset court/moyen : tente d'ajouter au jour courant si tolérance OK
+  // Tolérance : on ajoute tant que le total reste <= MAX_LINES_PER_DAY (6)
+  if (cur.lines + v.nLines > MAX_LINES_PER_DAY && cur.verses.length > 0) {
+    flushDay();
+  }
+  cur.verses.push(v);
+  cur.lines += v.nLines;
+  cur.pages.add(v.page);
+}
+flushDay();
+
+// Renuméroter les jours
+memoDays.forEach((d, i) => { d.day = i + 1; });
 
 const TOTAL_MEMO = memoDays.length;
 const TOTAL_DAYS = TOTAL_MEMO + CLOSING_DAYS;
@@ -207,6 +244,7 @@ memoDays.forEach((md, idx) => {
     juz: md.juz,
     nLines: md.nLines
   };
+  if (md.longVerse) entry.longVerse = md.longVerse;  // verset long split sur N jours
 
   // ── Liaison (Rabt) : jours 3+, fenêtre glissante par tour ──
   if (day >= 3) {

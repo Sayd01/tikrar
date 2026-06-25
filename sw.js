@@ -1,11 +1,12 @@
 // Tikrar Service Worker — stratégie network-first
 // Sert toujours la dernière version quand en ligne, tombe sur le cache hors-ligne.
-const CACHE_NAME = 'tikrar-v8';
+const CACHE_NAME = 'tikrar-v9-4lignes';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './data/program.json',
+  './data/verses.json',
   './data/quran-pages.json',
   './data/quran-milestones.json',
   './icons/icon-192.png',

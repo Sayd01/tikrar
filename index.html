@@ -1145,7 +1145,7 @@
 
   <main class="today-wrap">
     <div class="today-hero">
-      <div class="today-daynum" id="today-daynum">Jour 1 / 1988</div>
+      <div class="today-daynum" id="today-daynum">Jour 1 / 2385</div>
       <div class="today-quickstats" id="today-quickstats">—</div>
       <div class="today-page" id="today-page">—</div>
       <div class="today-sourate" id="today-sourate">—</div>
@@ -1173,7 +1173,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         Hier
       </button>
-      <div class="day-nav-center" onclick="openCarnet()" id="day-nav-center">JOUR 1 / 1988</div>
+      <div class="day-nav-center" onclick="openCarnet()" id="day-nav-center">JOUR 1 / 2385</div>
       <button class="day-nav-btn" onclick="navigateDay(1)" id="btn-next">
         Demain
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -1266,7 +1266,7 @@
           </svg>
           <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <span class="tabular" style="font-size: 30px; font-weight: 800; color: #073026;" id="stats-pct">0%</span>
-            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 1988</span>
+            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 2385</span>
           </div>
         </div>
         <div id="stats-eta" style="font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.72); margin-top: 16px; display: none;"></div>
@@ -1381,10 +1381,10 @@
       <div class="modal-card">
         <label class="field-label" for="set-current-day">Jour courant</label>
         <div style="display: flex; gap: 8px;">
-          <input type="number" id="set-current-day" min="1" max="1988" class="field-input" placeholder="N°" style="flex: 1;">
+          <input type="number" id="set-current-day" min="1" max="2385" class="field-input" placeholder="N°" style="flex: 1;">
           <button class="btn-primary" onclick="settingsSetDay()" style="padding: 9px 16px;">OK</button>
         </div>
-        <p class="field-help">1 → 1808 mémorisation · 1809 → 1988 clôture</p>
+        <p class="field-help">1 → 2205 mémorisation · 2206 → 2385 clôture</p>
       </div>
 
       <div class="modal-card">
@@ -1455,7 +1455,7 @@
         <h2 style="font-size: 16px; font-weight: 800; color: #0E4231; margin-top: 6px;">Bienvenue</h2>
         <p style="font-size: 11px; color: rgba(14,66,49,0.65); margin-top: 4px; line-height: 1.45;">
           Mémorisation du Coran<br>
-          1808 jours + 6 mois de clôture
+          2205 jours + 6 mois de clôture
         </p>
       </div>
 
@@ -1472,7 +1472,7 @@
       </div>
       <div style="margin-bottom: 16px;">
         <label class="field-label">Jour actuel</label>
-        <input type="number" id="ob-current-day" min="1" max="1988" value="1" class="field-input">
+        <input type="number" id="ob-current-day" min="1" max="2385" value="1" class="field-input">
       </div>
 
       <button class="btn-primary" onclick="completeOnboarding()" style="width: 100%; padding: 13px;">
@@ -1486,10 +1486,12 @@
 
   <script>
   // ============================================================
-  // CONFIG
+  // CONFIG — valeurs initialisées au boot depuis program.json meta.
+  // Fallback hardcodé pour le cas où program.json n'a pas de meta (legacy v1/v2).
   // ============================================================
-  const TOTAL_MEMO = 1808;
-  const TOTAL_DAYS = 1988;
+  let TOTAL_MEMO = 2205;     // schema v3 : 4 lignes/jour (Mushaf Madinah)
+  let TOTAL_DAYS = 2385;     // 2205 mémo + 180 clôture
+  let PROGRAM_META = { schemaVersion: 3, totalMemo: 2205, totalDays: 2385, closingDays: 180 };
 
   const ICONS = {
     memo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
@@ -1518,15 +1520,22 @@
   async function init() {
     try {
       const r = await fetch('./data/program.json');
-      programData = await r.json();
+      const raw = await r.json();
+      // Schema v3 : {meta, program}. Anciens schemas : array direct.
+      if (Array.isArray(raw)) {
+        programData = raw;
+      } else if (raw && raw.program) {
+        programData = raw.program;
+        if (raw.meta) {
+          PROGRAM_META = raw.meta;
+          TOTAL_MEMO = raw.meta.totalMemo || TOTAL_MEMO;
+          TOTAL_DAYS = raw.meta.totalDays || TOTAL_DAYS;
+        }
+      } else {
+        programData = generateProgramFallback();
+      }
     } catch (e) {
       programData = generateProgramFallback();
-    }
-    try {
-      const r2 = await fetch('./data/quran-pages.json');
-      quranPages = await r2.json();
-    } catch (e) {
-      quranPages = {};
     }
     try {
       const r3 = await fetch('./data/quran-milestones.json');
@@ -1715,27 +1724,22 @@
   // FORMAT helpers
   // ============================================================
   // Indicateur visuel ● ● ○ pour t1 / t2 / t3
-  function partDots(part, size) {
-    if (!part) return '';
-    const idx = part === 't1' ? 0 : part === 't2' ? 1 : 2;
-    const cls = 'part-dots' + (size ? ' ' + size : '');
-    let html = '<span class="' + cls + '">';
-    for (let i = 0; i < 3; i++) html += '<span class="part-dot' + (i === idx ? ' active' : '') + '"></span>';
-    return html + '</span>';
-  }
+  // partDots : obsolète depuis schema v3 (plus de tiers t1/t2/t3).
+  // Retourne chaîne vide pour compat avec l'UI existante.
+  function partDots() { return ''; }
 
+  // formatTask : retourne « Page X » (sans tier) pour un jour de mémo, ou day# pour clôture
   function formatTask(day) {
     const d = programData[day - 1];
     if (!d || d.isClosing) return String(day);
-    if (!d.part) return String(d.mushafPage);
-    return d.mushafPage + ' ' + d.part;
+    return String(d.mushafPage);
   }
   function formatRange(s, e) {
     if (!s || !e) return '—';
     const a = formatTask(s), b = formatTask(e);
     return a === b ? a : a + '→' + b;
   }
-  // Plage de pages sans tier (« Pages 4 → 12 »)
+  // Plage de pages (« Pages 4 → 12 »)
   function formatPageRange(s, e) {
     if (!s || !e) return '—';
     const sD = programData[s - 1], eD = programData[e - 1];
@@ -1747,40 +1751,24 @@
   }
 
   // ============================================================
-  // VERSETS — calcul du range de versets par tiers
+  // VERSETS — schema v3 : les versets sont directement dans d.verses
   // ============================================================
-  // Versets composant un tiers (ou la page entière si part === null)
-  // Retourne un array [{s, f, t}] (regroupé par sourate)
-  function getVersesForTask(page, part) {
-    const chunks = quranPages[String(page)];
-    if (!chunks || !chunks.length) return null;
-    if (!part) return chunks.map(c => ({...c}));   // page entière (jours 1-2)
+  function getVersesForDay(day) {
+    const d = (typeof day === 'object') ? day : programData[day - 1];
+    if (!d || d.isClosing) return null;
+    return d.verses || null;
+  }
 
-    // Aplatir tous les versets de la page
-    const verses = [];
-    chunks.forEach(c => { for (let a = c.f; a <= c.t; a++) verses.push({s: c.s, a}); });
-    const N = verses.length;
-    if (!N) return null;
-
-    // Distribuer en 3 tiers le plus équilibré possible
-    // reste 0 : [b,b,b] · reste 1 : 1 verset en plus au milieu · reste 2 : aux bords
-    const base = Math.floor(N / 3), rem = N % 3;
-    const sizes = rem === 0 ? [base, base, base]
-                : rem === 1 ? [base, base + 1, base]
-                            : [base + 1, base, base + 1];
-
-    const idx = part === 't1' ? 0 : part === 't2' ? 1 : 2;
-    let start = 0; for (let i = 0; i < idx; i++) start += sizes[i];
-    const slice = verses.slice(start, start + sizes[idx]);
-
-    // Regrouper par sourate
-    const out = [];
-    slice.forEach(v => {
-      const last = out[out.length - 1];
-      if (last && last.s === v.s && last.t + 1 === v.a) last.t = v.a;
-      else out.push({s: v.s, f: v.a, t: v.a});
-    });
-    return out;
+  // Alias pour compat ascendante (ancien nom)
+  function getVersesForTask(pageOrDay, part) {
+    // Si appelé à l'ancienne (page, part), on tente de récupérer le jour
+    // En pratique le nouveau code appelle getVersesForDay(d) directement.
+    if (typeof pageOrDay === 'object') return getVersesForDay(pageOrDay);
+    // Fallback : chercher le 1er jour qui a cette page comme primaryPage
+    for (const d of programData) {
+      if (!d.isClosing && d.mushafPage === pageOrDay) return d.verses || null;
+    }
+    return null;
   }
 
   // Range de versets d'une plage de jours (liaison / révision)
@@ -1788,8 +1776,8 @@
     if (!fromDay || !toDay) return null;
     const fD = programData[fromDay - 1], tD = programData[toDay - 1];
     if (!fD || !tD || fD.isClosing || tD.isClosing) return null;
-    const fV = getVersesForTask(fD.mushafPage, fD.part);
-    const tV = getVersesForTask(tD.mushafPage, tD.part);
+    const fV = fD.verses;
+    const tV = tD.verses;
     if (!fV || !fV.length || !tV || !tV.length) return null;
     return { fromS: fV[0].s, fromA: fV[0].f, toS: tV[tV.length - 1].s, toA: tV[tV.length - 1].t };
   }
@@ -1853,13 +1841,13 @@
     const t = [];
 
     // ===== Mémorisation : versets en premier, info technique réduite =====
-    const memoVerses = getVersesForTask(d.mushafPage, d.part);
+    const memoVerses = getVersesForDay(d);
     const memoText = fmtChunksText(memoVerses);
     const memoCount = countVerses(memoVerses);
     t.push({
       id: 'memo',
       label: 'Mémorisation',
-      content: memoText || ('Page ' + d.mushafPage + (d.part ? ' ' + d.part : '')),
+      content: memoText || ('Page ' + d.mushafPage),
       extra: memoCount > 0 ? memoCount + (memoCount > 1 ? ' versets' : ' verset') : '',
       icon: ICONS.memo
     });
@@ -1932,12 +1920,15 @@
         '<span class="pill closing">Clôture ' + d.closingTour + ' / 30</span>' +
         '<span class="pill closing">Jour ' + d.closingDay + ' / 6</span>';
     } else {
-      pageEl.innerHTML = 'Page ' + d.mushafPage + partDots(d.part);
+      // Page(s) couverte(s) par les 4 lignes du jour
+      pageEl.innerHTML = (d.pages && d.pages.length > 1)
+        ? 'Pages ' + d.pages.join('-')
+        : 'Page ' + d.mushafPage;
       sourateEl.textContent = d.sourate;
       sourateEl.className = 'today-sourate ' + (d.revelation === 'makkan' ? 'makkan' : 'medinan');
       // Milestone éventuel (Juz/Hizb/Rub commençant dans le tiers)
       let msHtml = '';
-      const memoVerses = getVersesForTask(d.mushafPage, d.part);
+      const memoVerses = getVersesForDay(d);
       const ms = findTopMilestone(memoVerses);
       if (ms) {
         if (ms.top === 'juz')       msHtml = '<span class="pill ms-juz">✦ Début Juz ' + ms.juz + '</span>';
@@ -1978,7 +1969,7 @@
     document.getElementById('today-notes-input').value = (p.notes) || '';
 
     // Compteur de difficultés du jour (versets marqués qui sont dans la portion d'aujourd'hui)
-    const memoVerses = d.isClosing ? null : getVersesForTask(d.mushafPage, d.part);
+    const memoVerses = d.isClosing ? null : getVersesForDay(d);
     let diffCount = 0;
     if (memoVerses) {
       memoVerses.forEach(c => {
@@ -2037,7 +2028,7 @@
       sourateHtml = 'Clôture';
       sourateCls = 'closing';
     } else {
-      pageHtml = d.mushafPage + partDots(d.part, 'xs');
+      pageHtml = d.mushafPage;
       sourateHtml = d.sourate;
       sourateCls = d.revelation;
     }
@@ -2092,7 +2083,7 @@
         '<div class="ex-head"><span class="ex-day-label">Jour ' + day + ' / ' + TOTAL_DAYS + '</span>' +
           (d.tourNumber > 0 ? '<span class="ex-day-badge">Tour ' + d.tourNumber + ' · J' + d.tourDay + '/6</span>' : '') +
         '</div>' +
-        '<div class="ex-title">Page ' + d.mushafPage + partDots(d.part, 'sm') +
+        '<div class="ex-title">Page ' + d.mushafPage +
           '<span class="sep">·</span><span class="' + revelationCls + '">' + d.sourate + '</span>' +
         '</div>' +
         '<div class="ex-pills">' +
@@ -2260,7 +2251,7 @@
     haptic(10);
     const d = programData[currentDay - 1];
     if (!d || d.isClosing) return;
-    const verses = getVersesForTask(d.mushafPage, d.part);
+    const verses = getVersesForDay(d);
     if (!verses || !verses.length) return;
     const flatVerses = [];
     verses.forEach(c => { for (let a = c.f; a <= c.t; a++) flatVerses.push({s: c.s, a}); });
@@ -2474,7 +2465,7 @@
     for (const p in pd) if (pd[p].every(d => isDayComplete(d))) n++;
     return n;
   }
-  // ----- Calculs par tâche (sur tout le programme 1-1988) -----
+  // ----- Calculs par tâche (sur tout le programme 1-2385) -----
   function calcTaskStats() {
     const s = {
       memo:    { done: 0, total: 0 },
@@ -2658,7 +2649,7 @@
     for (let s = 1; s <= 114; s++) stats[s] = { done: 0, total: 0 };
     programData.forEach(d => {
       if (d.isClosing) return;
-      const verses = getVersesForTask(d.mushafPage, d.part);
+      const verses = getVersesForDay(d);
       if (!verses) return;
       const isDone = isDayComplete(d.day);
       verses.forEach(c => {
@@ -2832,7 +2823,7 @@
     const days = [];
     programData.forEach(d => {
       if (d.isClosing) return;
-      const verses = getVersesForTask(d.mushafPage, d.part);
+      const verses = getVersesForDay(d);
       if (!verses) return;
       const containingChunks = verses.filter(c => c.s === surahNum);
       if (containingChunks.length === 0) return;
@@ -2891,7 +2882,7 @@
       const dd = item.day, isDone = isDayComplete(dd.day), isPart = !isDone && isDayPartial(dd.day);
       const mark = isDone ? '<span class="sou-day-mark done">✓</span>' : isPart ? '<span class="sou-day-mark partial">◐</span>' : '<span class="sou-day-mark">○</span>';
       const versesStr = item.chunks.map(c => 'v' + (c.f === c.t ? c.f : c.f + '-' + c.t)).join(', ');
-      const pageStr = dd.mushafPage + (dd.part ? ' ' + dd.part : '');
+      const pageStr = 'Page ' + dd.mushafPage;
       const currentCls = dd.day === currentDay ? ' current-day' : '';
       let dateLabel;
       if (hasDate) {
@@ -3132,36 +3123,15 @@
   }
 
   // ============================================================
-  // FALLBACK (file://)
+  // FALLBACK (file:// non supporté pour schema v3)
   // ============================================================
+  // Le schema v3 (4 lignes/jour, 2205 entrées avec verses[] précis) ne peut PAS
+  // être régénéré inline raisonnablement (il dépend de verses.json = 1.4 MB).
+  // En cas de fetch échoué (file:// sur certains navigateurs), on retourne un
+  // tableau vide + affiche un toast d'erreur. Solution : servir via HTTP.
   function generateProgramFallback() {
-    const SURAH = [[1,"Al-Fatihah"],[2,"Al-Baqarah"],[50,"Aal-Imran"],[77,"An-Nisa"],[106,"Al-Ma'idah"],[128,"Al-An'am"],[151,"Al-A'raf"],[177,"Al-Anfal"],[187,"At-Tawbah"],[208,"Yunus"],[221,"Hud"],[235,"Yusuf"],[249,"Ar-Ra'd"],[255,"Ibrahim"],[262,"Al-Hijr"],[267,"An-Nahl"],[282,"Al-Isra"],[293,"Al-Kahf"],[305,"Maryam"],[312,"Ta-Ha"],[322,"Al-Anbiya"],[332,"Al-Hajj"],[342,"Al-Mu'minun"],[350,"An-Nur"],[359,"Al-Furqan"],[367,"Ash-Shu'ara"],[377,"An-Naml"],[385,"Al-Qasas"],[396,"Al-Ankabut"],[404,"Ar-Rum"],[411,"Luqman"],[415,"As-Sajdah"],[418,"Al-Ahzab"],[428,"Saba"],[434,"Fatir"],[440,"Ya-Sin"],[446,"As-Saffat"],[453,"Sad"],[458,"Az-Zumar"],[467,"Ghafir"],[477,"Fussilat"],[483,"Ash-Shura"],[489,"Az-Zukhruf"],[496,"Ad-Dukhan"],[499,"Al-Jathiyah"],[502,"Al-Ahqaf"],[507,"Muhammad"],[511,"Al-Fath"],[515,"Al-Hujurat"],[518,"Qaf"],[520,"Adh-Dhariyat"],[523,"At-Tur"],[526,"An-Najm"],[528,"Al-Qamar"],[531,"Ar-Rahman"],[534,"Al-Waqi'ah"],[537,"Al-Hadid"],[542,"Al-Mujadilah"],[545,"Al-Hashr"],[549,"Al-Mumtahanah"],[551,"As-Saff"],[553,"Al-Jumu'ah"],[554,"Al-Munafiqun"],[556,"At-Taghabun"],[558,"At-Talaq"],[560,"At-Tahrim"],[562,"Al-Mulk"],[564,"Al-Qalam"],[566,"Al-Haqqah"],[568,"Al-Ma'arij"],[570,"Nuh"],[572,"Al-Jinn"],[574,"Al-Muzzammil"],[575,"Al-Muddaththir"],[577,"Al-Qiyamah"],[578,"Al-Insan"],[580,"Al-Mursalat"],[582,"An-Naba"],[583,"An-Nazi'at"],[585,"Abasa"],[586,"At-Takwir"],[587,"Al-Infitar"],[587,"Al-Mutaffifin"],[589,"Al-Inshiqaq"],[590,"Al-Buruj"],[591,"At-Tariq"],[591,"Al-A'la"],[592,"Al-Ghashiyah"],[593,"Al-Fajr"],[594,"Al-Balad"],[595,"Ash-Shams"],[595,"Al-Layl"],[596,"Ad-Duha"],[596,"Ash-Sharh"],[597,"At-Tin"],[597,"Al-Alaq"],[598,"Al-Qadr"],[598,"Al-Bayyinah"],[599,"Az-Zalzalah"],[599,"Al-Adiyat"],[600,"Al-Qari'ah"],[600,"At-Takathur"],[601,"Al-Asr"],[601,"Al-Humazah"],[601,"Al-Fil"],[602,"Quraysh"],[602,"Al-Ma'un"],[602,"Al-Kawthar"],[603,"Al-Kafirun"],[603,"An-Nasr"],[603,"Al-Masad"],[604,"Al-Ikhlas"],[604,"Al-Falaq"],[604,"An-Nas"]];
-    const MED = new Set(["Al-Baqarah","Aal-Imran","An-Nisa","Al-Ma'idah","Al-Anfal","At-Tawbah","Al-Hajj","An-Nur","Al-Ahzab","Muhammad","Al-Fath","Al-Hujurat","Ar-Rahman","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Insan","Al-Bayyinah","Az-Zalzalah","An-Nasr"]);
-    const JUZ = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
-    const gs = p => { let s = SURAH[0][1]; for (const [sp,n] of SURAH) { if (sp <= p) s = n; else break; } return s; };
-    const gj = p => { let j = 1; for (let i = 0; i < JUZ.length; i++) { if (JUZ[i] <= p) j = i + 1; else break; } return j; };
-    const gt = d => d === 1 ? {p:1,part:null} : d === 2 ? {p:2,part:null} : (function(){const i=d-3;return {p:Math.floor(i/3)+3, part:'t'+((i%3)+1)};}());
-    const out = [];
-    for (let day = 1; day <= 1988; day++) {
-      if (day > 1808) {
-        const ci = day - 1808, ct = Math.floor((ci-1)/6)+1, k = ((ci-1)%6)+1, per = 1808/6;
-        out.push({day, isClosing:true, closingTour:ct, closingDay:k, totalClosingTours:30, revisionStartDay:Math.floor((k-1)*per)+1, revisionEndDay:Math.floor(k*per)});
-        continue;
-      }
-      const t = gt(day), sou = gs(t.p);
-      const e = {day, isClosing:false, mushafPage:t.p, part:t.part, sourate:sou, revelation:MED.has(sou)?'medinan':'makkan', juz:gj(t.p)};
-      if (day >= 3) {
-        e.liaisonStartDay = day < 33 ? 1 : (6 * (Math.floor((day-33)/6)+1) + 1);
-        e.liaisonEndDay = day - 2;
-      } else { e.liaisonStartDay = 0; e.liaisonEndDay = 0; }
-      if (day >= 33) {
-        const T = Math.floor((day-33)/6)+1, k = ((day-33)%6)+1, ttr = Math.min(6*T, 1808), per = ttr/6;
-        e.tourNumber = T; e.tourDay = k;
-        e.revisionStartDay = Math.floor((k-1)*per)+1; e.revisionEndDay = Math.floor(k*per);
-      } else { e.tourNumber = 0; e.tourDay = 0; e.revisionStartDay = 0; e.revisionEndDay = 0; }
-      out.push(e);
-    }
-    return out;
+    setTimeout(() => showToast('Erreur : ouvre l\'app via HTTP (pas file://)'), 500);
+    return [];
   }
 
   // ============================================================

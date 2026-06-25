@@ -1,11 +1,26 @@
-// Génération du programme Tikrar complet, conformément au PDF officiel.
-// - 1206 jours de mémorisation (1 demi-page/jour, jours 1-2 = pages entières)
-// - 180 jours de clôture (6 mois, rule 9) = 30 tours de 6 jours
-// - Liaison glissante par tour (saute tous les 6 jours dès le jour 33)
-// - Révision = plage de pages à réciter ce jour-là (selon le tour)
-// - Tour numbering commence au jour 33 (= premier tour de révision)
+// Génération du programme Tikrar — découpage 4 LIGNES PAR JOUR (refactor v3).
+//
+// Source de données : data/verses.json (KFGQPC Mushaf Madinah 1441H via MohamadHajjRabee/quran-qcf4)
+// Format source : { "<surah>:<ayah>": { page: N, lines: [{line, word_start, word_end}, ...] } }
+//
+// Algorithme : on parcourt LES LIGNES uniques (page, line) dans l'ordre du Mushaf, et on
+// regroupe par paquets de 4 → 1 jour = 4 lignes physiques consécutives. Chaque jour collecte
+// la liste des versets touchés (au moins en partie) par ses 4 lignes.
+//
+// + 180 jours de clôture (6 mois × 30 j = 30 tours de 6 jours pour relire tout le Coran).
+//
+// Toutes les mécaniques Tikrar (liaison glissante, révision, tour, milestones Juz/Hizb/Rub)
+// sont préservées avec les NOUVELLES formules de jours.
 
 const fs = require('fs');
+
+const LINES_PER_DAY = 4;
+const CLOSING_TOURS = 30;
+const CLOSING_DAYS = CLOSING_TOURS * 6;   // 180 jours
+
+// ────────────────────────────────────────────────────────────────
+// Données canoniques Coran (cohérentes avec l'ancien generate-program.js)
+// ────────────────────────────────────────────────────────────────
 
 const SURAH_STARTS = [
   [1, "Al-Fatihah"], [2, "Al-Baqarah"], [50, "Aal-Imran"], [77, "An-Nisa"],
@@ -55,101 +70,164 @@ const JUZ_STARTS = [
   402, 422, 442, 462, 482, 502, 522, 542, 562, 582
 ];
 
-function getSurah(page) {
-  let s = SURAH_STARTS[0][1];
-  for (const [sp, n] of SURAH_STARTS) {
-    if (sp <= page) s = n; else break;
-  }
-  return s;
-}
 function getJuz(page) {
-  let j = 1;
+  let juz = 1;
   for (let i = 0; i < JUZ_STARTS.length; i++) {
-    if (JUZ_STARTS[i] <= page) j = i + 1; else break;
+    if (JUZ_STARTS[i] <= page) juz = i + 1; else break;
   }
-  return j;
-}
-// Tâche d'un jour (page + tiers)
-// - Jour 1 : page 1 entière (Al-Fatihah)
-// - Jour 2 : page 2 entière (début Al-Baqarah)
-// - Jour N≥3 : 1/3 de page, page = floor((N-3)/3)+3, part = t1 / t2 / t3
-function getTask(day) {
-  if (day === 1) return { mushafPage: 1, part: null };
-  if (day === 2) return { mushafPage: 2, part: null };
-  const idx = day - 3;
-  return {
-    mushafPage: Math.floor(idx / 3) + 3,
-    part: 't' + ((idx % 3) + 1)
-  };
+  return juz;
 }
 
-// 2 pages entières + 602 pages × 3 tiers = 1808 jours de mémorisation
-const TOTAL_MEMO = 2 + (604 - 2) * 3;       // 1808
-const CLOSING_TOURS = 30;                   // 30 tours de clôture (6 mois)
-const CLOSING_DAYS = CLOSING_TOURS * 6;     // 180 jours
-const TOTAL_DAYS = TOTAL_MEMO + CLOSING_DAYS;  // 1988
+function getSurahName(surahNumber) {
+  return SURAH_STARTS[surahNumber - 1][1];
+}
+
+function isMedinan(surahNumber) {
+  return MEDINAN.has(getSurahName(surahNumber));
+}
+
+// ────────────────────────────────────────────────────────────────
+// Chargement des données ligne/verset
+// ────────────────────────────────────────────────────────────────
+
+const versesRaw = JSON.parse(fs.readFileSync('./data/verses.json', 'utf8'));
+console.log(`Loaded verses.json : ${Object.keys(versesRaw).length} versets`);
+
+// On construit lines[] = liste ordonnée de toutes les lignes du Mushaf
+//   chaque entrée = { page, line, verses: Set('s:a'), firstVerseKey: 's:a' }
+// + verseToLines : pour chaque verset, la liste des (page, line) qu'il occupe
+
+const linesMap = new Map();   // "page:line" → { page, line, verses: Set, firstSurah, firstAyah }
+const verseToLines = new Map(); // "s:a" → [{page, line}, ...]
+
+Object.keys(versesRaw).forEach(key => {
+  const [s, a] = key.split(':').map(Number);
+  const v = versesRaw[key];
+  const occLines = [];
+  v.lines.forEach(li => {
+    const lkey = `${v.page}:${li.line}`;
+    if (!linesMap.has(lkey)) {
+      linesMap.set(lkey, { page: v.page, line: li.line, verses: new Set() });
+    }
+    linesMap.get(lkey).verses.add(key);
+    occLines.push({ page: v.page, line: li.line });
+  });
+  verseToLines.set(key, occLines);
+});
+
+// Trier les lignes par (page, line) — ordre lecture du Mushaf
+const sortedLines = [...linesMap.values()].sort((A, B) => {
+  if (A.page !== B.page) return A.page - B.page;
+  return A.line - B.line;
+});
+
+console.log(`Lignes uniques (Mushaf Madinah) : ${sortedLines.length}`);
+
+// ────────────────────────────────────────────────────────────────
+// ALGO : grouper en paquets de 4 lignes consécutives → 1 jour
+// ────────────────────────────────────────────────────────────────
+
+const memoDays = [];
+for (let i = 0; i < sortedLines.length; i += LINES_PER_DAY) {
+  const chunk = sortedLines.slice(i, i + LINES_PER_DAY);
+
+  // Collecter les versets uniques touchés
+  const versesTouched = new Set();
+  chunk.forEach(l => l.verses.forEach(k => versesTouched.add(k)));
+
+  // Trier les versets en ordre canonique
+  const sortedVerseKeys = [...versesTouched].sort((A, B) => {
+    const [sa, aa] = A.split(':').map(Number);
+    const [sb, ab] = B.split(':').map(Number);
+    return sa - sb || aa - ab;
+  });
+
+  // Construire les chunks par sourate (groupes consécutifs)
+  const verseChunks = [];
+  sortedVerseKeys.forEach(k => {
+    const [s, a] = k.split(':').map(Number);
+    const last = verseChunks[verseChunks.length - 1];
+    if (last && last.s === s && last.t + 1 === a) {
+      last.t = a;
+    } else {
+      verseChunks.push({ s, f: a, t: a });
+    }
+  });
+
+  // Pages couvertes par le jour
+  const pages = [...new Set(chunk.map(l => l.page))].sort((a, b) => a - b);
+  const primaryPage = chunk[0].page;
+
+  // Sourate primaire = celle du premier verset
+  const firstVerse = sortedVerseKeys[0].split(':');
+  const primarySurah = parseInt(firstVerse[0]);
+  const primaryAyah = parseInt(firstVerse[1]);
+
+  // Lignes occupées (pour debug)
+  const lineLabels = chunk.map(l => `${l.page}:${l.line}`);
+
+  memoDays.push({
+    verses: verseChunks,
+    pages,
+    primaryPage,
+    primarySurah,
+    primarySourate: getSurahName(primarySurah),
+    revelation: isMedinan(primarySurah) ? 'medinan' : 'makkan',
+    juz: getJuz(primaryPage),
+    nLines: chunk.length,
+    lineLabels  // debug/info, on l'enlèvera si trop gros
+  });
+}
+
+const TOTAL_MEMO = memoDays.length;
+const TOTAL_DAYS = TOTAL_MEMO + CLOSING_DAYS;
+const TOTAL_MEMO_TOURS = Math.max(0, Math.floor((TOTAL_MEMO - 33) / 6) + 1);
+
+console.log(`\nTOTAL_MEMO = ${TOTAL_MEMO} jours (algo 4 lignes/jour strict)`);
+console.log(`TOTAL_DAYS = ${TOTAL_DAYS} jours (incl. ${CLOSING_DAYS} de clôture)`);
+console.log(`Tours mémorisation : ${TOTAL_MEMO_TOURS}`);
+
+// ────────────────────────────────────────────────────────────────
+// CONSTRUCTION du programme final avec liaison/révision/tour
+// ────────────────────────────────────────────────────────────────
 
 const program = [];
 
-for (let day = 1; day <= TOTAL_DAYS; day++) {
-  // ========== Phase de clôture (jours 1207-1386) ==========
-  if (day > TOTAL_MEMO) {
-    const closingIdx = day - TOTAL_MEMO;                    // 1..180
-    const closingTour = Math.floor((closingIdx - 1) / 6) + 1; // 1..30
-    const k = ((closingIdx - 1) % 6) + 1;                   // 1..6
-    // Chaque tour de clôture = tout le Coran (1206 demi-tâches) réparti sur 6 jours
-    const perPosition = TOTAL_MEMO / 6;                     // 201
-    const revStart = Math.floor((k - 1) * perPosition) + 1;
-    const revEnd = Math.floor(k * perPosition);
-
-    program.push({
-      day,
-      isClosing: true,
-      closingTour,
-      closingDay: k,
-      totalClosingTours: CLOSING_TOURS,
-      revisionStartDay: revStart,
-      revisionEndDay: revEnd
-    });
-    continue;
-  }
-
-  // ========== Phase de mémorisation (jours 1-1206) ==========
-  const task = getTask(day);
-  const sourate = getSurah(task.mushafPage);
+memoDays.forEach((md, idx) => {
+  const day = idx + 1;
 
   const entry = {
     day,
     isClosing: false,
-    mushafPage: task.mushafPage,
-    part: task.part,                           // null pour jours 1-2, sinon 't1' / 't2' / 't3'
-    sourate,
-    revelation: MEDINAN.has(sourate) ? 'medinan' : 'makkan',
-    juz: getJuz(task.mushafPage)
+    verses: md.verses,             // [{s, f, t}, ...]
+    pages: md.pages,
+    mushafPage: md.primaryPage,    // pour compat ascendante avec UI Tikrar
+    sourate: md.primarySourate,
+    revelation: md.revelation,
+    juz: md.juz,
+    nLines: md.nLines
   };
 
-  // ----- Liaison (Rabt) — jours 3+ -----
+  // ── Liaison (Rabt) : jours 3+, fenêtre glissante par tour ──
   if (day >= 3) {
     let liaisonStart;
     if (day < 33) {
-      liaisonStart = 1;                       // avant le 1ᵉʳ tour : depuis le début
+      liaisonStart = 1;
     } else {
-      // Saute de 6 jours à chaque nouveau tour
       const tourAtDay = Math.floor((day - 33) / 6) + 1;
       liaisonStart = 6 * tourAtDay + 1;
     }
     entry.liaisonStartDay = liaisonStart;
-    entry.liaisonEndDay = day - 2;            // exclut hier (= répétition) et aujourd'hui (= mémo nouvelle)
+    entry.liaisonEndDay = day - 2;
   } else {
     entry.liaisonStartDay = 0;
     entry.liaisonEndDay = 0;
   }
 
-  // ----- Tour & Révision (Murajaa) — jours 33+ -----
+  // ── Tour & Révision (Murajaa) : jours 33+ ──
   if (day >= 33) {
-    const T = Math.floor((day - 33) / 6) + 1;             // numéro du tour
-    const k = ((day - 33) % 6) + 1;                       // position dans le tour (1..6)
-    // Le tour T couvre l'ancienne mémorisation = jours 1 à 6T (plafonné à 1206)
+    const T = Math.floor((day - 33) / 6) + 1;
+    const k = ((day - 33) % 6) + 1;
     const totalToRevise = Math.min(6 * T, TOTAL_MEMO);
     const perPosition = totalToRevise / 6;
     const revStart = Math.floor((k - 1) * perPosition) + 1;
@@ -167,16 +245,60 @@ for (let day = 1; day <= TOTAL_DAYS; day++) {
   }
 
   program.push(entry);
+});
+
+// ── Phase de clôture (180 jours) ──
+const closingPerPosition = TOTAL_MEMO / 6;
+
+for (let i = 0; i < CLOSING_DAYS; i++) {
+  const day = TOTAL_MEMO + i + 1;
+  const closingIdx = i + 1;
+  const closingTour = Math.floor((closingIdx - 1) / 6) + 1;
+  const k = ((closingIdx - 1) % 6) + 1;
+  const revStart = Math.floor((k - 1) * closingPerPosition) + 1;
+  const revEnd = Math.floor(k * closingPerPosition);
+
+  program.push({
+    day,
+    isClosing: true,
+    closingTour,
+    closingDay: k,
+    totalClosingTours: CLOSING_TOURS,
+    revisionStartDay: revStart,
+    revisionEndDay: revEnd
+  });
 }
 
-fs.writeFileSync('./data/program.json', JSON.stringify(program), 'utf8');
+// ── Métadata embarquée dans program.json (utilisée par l'app) ──
+const meta = {
+  schemaVersion: 3,
+  schema: 'quadri-lignes',
+  generatedAt: '2026-06-25',
+  source: 'KFGQPC Mushaf Madinah 1441H via MohamadHajjRabee/quran-qcf4',
+  algorithm: 'strict 4 lignes Mushaf par jour, regroupement par sourate, chunks consécutifs',
+  totalMemo: TOTAL_MEMO,
+  totalDays: TOTAL_DAYS,
+  closingTours: CLOSING_TOURS,
+  closingDays: CLOSING_DAYS,
+  memoTours: TOTAL_MEMO_TOURS
+};
 
-const totalMemoTours = Math.floor((TOTAL_MEMO - 33) / 6) + 1;
-console.log(`Generated ${program.length} entries (${TOTAL_MEMO} mémo + ${CLOSING_DAYS} clôture)`);
-console.log(`Tours mémorisation : ${totalMemoTours}, Tours clôture : ${CLOSING_TOURS}, Total : ${totalMemoTours + CLOSING_TOURS}`);
-console.log('Day 1   :', program[0]);
-console.log('Day 33  :', program[32]);
-console.log('Day 45  :', program[44]);
-console.log('Day 1206:', program[1205]);
-console.log('Day 1207:', program[1206]);
-console.log('Day 1386:', program[1385]);
+// Output
+const output = { meta, program };
+fs.writeFileSync('./data/program.json', JSON.stringify(output), 'utf8');
+
+console.log(`\n✓ Écrit ./data/program.json (${(fs.statSync('./data/program.json').size / 1024).toFixed(1)} KB)`);
+console.log(`  ${program.length} entrées (${TOTAL_MEMO} mémo + ${CLOSING_DAYS} clôture)`);
+
+// Échantillons pour vérification
+console.log('\n=== Échantillons ===');
+[0, 1, 2, 4, 32, 100, 200, TOTAL_MEMO - 1, TOTAL_MEMO, TOTAL_DAYS - 1].forEach(i => {
+  const e = program[i];
+  if (!e) return;
+  if (e.isClosing) {
+    console.log(`Jour ${e.day} (CLÔTURE) : tour ${e.closingTour}/30 · J${e.closingDay}/6 · révise jours ${e.revisionStartDay}→${e.revisionEndDay}`);
+  } else {
+    const v = e.verses.map(c => `${getSurahName(c.s)} ${c.f === c.t ? c.f : c.f + '-' + c.t}`).join(' · ');
+    console.log(`Jour ${e.day.toString().padStart(4)} : ${v} | page ${e.mushafPage} | juz ${e.juz} | ${e.nLines} lignes`);
+  }
+});

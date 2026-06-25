@@ -1145,7 +1145,7 @@
 
   <main class="today-wrap">
     <div class="today-hero">
-      <div class="today-daynum" id="today-daynum">Jour 1 / 2130</div>
+      <div class="today-daynum" id="today-daynum">Jour 1 / 2391</div>
       <div class="today-quickstats" id="today-quickstats">—</div>
       <div class="today-page" id="today-page">—</div>
       <div class="today-sourate" id="today-sourate">—</div>
@@ -1173,7 +1173,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         Hier
       </button>
-      <div class="day-nav-center" onclick="openCarnet()" id="day-nav-center">JOUR 1 / 2130</div>
+      <div class="day-nav-center" onclick="openCarnet()" id="day-nav-center">JOUR 1 / 2391</div>
       <button class="day-nav-btn" onclick="navigateDay(1)" id="btn-next">
         Demain
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -1266,7 +1266,7 @@
           </svg>
           <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <span class="tabular" style="font-size: 30px; font-weight: 800; color: #073026;" id="stats-pct">0%</span>
-            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 2130</span>
+            <span class="tabular" style="font-size: 11px; font-weight: 600; color: rgba(14,66,49,0.55); margin-top: 2px;" id="stats-days-text">0 / 2391</span>
           </div>
         </div>
         <div id="stats-eta" style="font-size: 12px; font-weight: 700; color: rgba(14,66,49,0.72); margin-top: 16px; display: none;"></div>
@@ -1381,10 +1381,10 @@
       <div class="modal-card">
         <label class="field-label" for="set-current-day">Jour courant</label>
         <div style="display: flex; gap: 8px;">
-          <input type="number" id="set-current-day" min="1" max="2130" class="field-input" placeholder="N°" style="flex: 1;">
+          <input type="number" id="set-current-day" min="1" max="2391" class="field-input" placeholder="N°" style="flex: 1;">
           <button class="btn-primary" onclick="settingsSetDay()" style="padding: 9px 16px;">OK</button>
         </div>
-        <p class="field-help">1 → 1950 mémorisation · 1951 → 2130 clôture</p>
+        <p class="field-help">1 → 2211 mémorisation · 2212 → 2391 clôture</p>
       </div>
 
       <div class="modal-card">
@@ -1455,7 +1455,7 @@
         <h2 style="font-size: 16px; font-weight: 800; color: #0E4231; margin-top: 6px;">Bienvenue</h2>
         <p style="font-size: 11px; color: rgba(14,66,49,0.65); margin-top: 4px; line-height: 1.45;">
           Mémorisation du Coran<br>
-          1950 jours + 6 mois de clôture
+          2211 jours + 6 mois de clôture
         </p>
       </div>
 
@@ -1472,7 +1472,7 @@
       </div>
       <div style="margin-bottom: 16px;">
         <label class="field-label">Jour actuel</label>
-        <input type="number" id="ob-current-day" min="1" max="2130" value="1" class="field-input">
+        <input type="number" id="ob-current-day" min="1" max="2391" value="1" class="field-input">
       </div>
 
       <button class="btn-primary" onclick="completeOnboarding()" style="width: 100%; padding: 13px;">
@@ -1489,9 +1489,9 @@
   // CONFIG — valeurs initialisées au boot depuis program.json meta.
   // Fallback hardcodé pour le cas où program.json n'a pas de meta (legacy v1/v2).
   // ============================================================
-  let TOTAL_MEMO = 1950;     // schema v3 : 4 lignes/jour (Mushaf Madinah)
-  let TOTAL_DAYS = 2130;     // 2205 mémo + 180 clôture
-  let PROGRAM_META = { schemaVersion: 3, totalMemo: 1950, totalDays: 2130, closingDays: 180 };
+  let TOTAL_MEMO = 2211;     // schema v3 : 4 lignes/jour (Mushaf Madinah)
+  let TOTAL_DAYS = 2391;     // 2205 mémo + 180 clôture
+  let PROGRAM_META = { schemaVersion: 3, totalMemo: 2211, totalDays: 2391, closingDays: 180 };
 
   const ICONS = {
     memo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
@@ -2482,7 +2482,7 @@
     for (const p in pd) if (pd[p].every(d => isDayComplete(d))) n++;
     return n;
   }
-  // ----- Calculs par tâche (sur tout le programme 1-2130) -----
+  // ----- Calculs par tâche (sur tout le programme 1-2391) -----
   function calcTaskStats() {
     const s = {
       memo:    { done: 0, total: 0 },

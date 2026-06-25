@@ -16,6 +16,7 @@ const fs = require('fs');
 
 const LINES_PER_DAY = 4;          // cible quotidienne
 const MAX_LINES_PER_DAY = 6;      // tolérance haute (pour grouper versets entiers)
+const SOLO_VERSE_THRESHOLD = 4;   // verset ≥ N lignes = 1 jour dédié (assez long pour être seul)
 const CLOSING_TOURS = 30;
 const CLOSING_DAYS = CLOSING_TOURS * 6;   // 180 jours
 
@@ -214,7 +215,7 @@ for (const v of orderedVerses) {
   }
 
   if (v.nLines > MAX_LINES_PER_DAY) {
-    // Verset long → ferme le jour courant, dédie ceil(n/4) jours
+    // Verset très long (> 6 lignes) → split sur plusieurs jours dédiés
     flushDay();
     const numDays = Math.ceil(v.nLines / LINES_PER_DAY);
     for (let i = 0; i < numDays; i++) {
@@ -236,7 +237,17 @@ for (const v of orderedVerses) {
     continue;
   }
 
-  // Verset court/moyen : tente d'ajouter au jour courant si tolérance OK
+  // Verset substantiel (≥ 4 lignes) → 1 jour dédié (seul)
+  if (v.nLines >= SOLO_VERSE_THRESHOLD) {
+    flushDay();
+    cur.verses.push(v);
+    v.lineKeys.forEach(k => cur.uniqueLines.add(k));
+    cur.pages.add(v.page);
+    flushDay();
+    continue;
+  }
+
+  // Verset court (< 4 lignes) : tente d'ajouter au jour courant si tolérance OK
   // Tolérance : on compte les LIGNES UNIQUES (versets partagent souvent une ligne)
   // On accepte tant que le total de lignes uniques reste <= MAX_LINES_PER_DAY (6)
   const projected = new Set(cur.uniqueLines);

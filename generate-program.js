@@ -14,9 +14,9 @@
 
 const fs = require('fs');
 
-const LINES_PER_DAY = 4;          // cible quotidienne
-const MAX_LINES_PER_DAY = 6;      // tolérance haute (pour grouper versets entiers)
-const SOLO_VERSE_THRESHOLD = 4;   // verset ≥ N lignes = 1 jour dédié (assez long pour être seul)
+const LINES_PER_DAY = 5;          // cible quotidienne (15 lignes/page ÷ 3 jours = 5)
+const MAX_LINES_PER_DAY = 7;      // toléré pour permettre [5,5,7] ou similaire en 3 groupes
+const MAX_DAYS_PER_PAGE = 3;      // CONTRAINTE PÉDAGOGIQUE : jamais plus de 3 jours par page
 const CLOSING_TOURS = 30;
 const CLOSING_DAYS = CLOSING_TOURS * 6;   // 180 jours
 
@@ -192,11 +192,12 @@ for (const v of orderedVerses) {
 }
 
 // DP : partition optimale d'une liste de versets courts/moyens (≤ MAX_LINES)
-// Coût d'un groupe = (nLines - LINES_PER_DAY)²
-// Coût total minimisé = répartition la plus proche du target sans orphelins
-function dpPartition(verses) {
+// Contrainte DURE : maxGroups (= MAX_DAYS_PER_PAGE, défaut 3).
+// Coût d'un groupe = (nLines - LINES_PER_DAY)². Coût total minimisé.
+function dpPartition(verses, maxGroups) {
   const n = verses.length;
   if (n === 0) return [];
+  maxGroups = maxGroups || MAX_DAYS_PER_PAGE;
 
   // uniqueLines(j, i) = nb lignes uniques du sous-ensemble [j..i-1]
   const uniqueLines = (j, i) => {
@@ -205,33 +206,54 @@ function dpPartition(verses) {
     return s.size;
   };
 
-  // dp[i] = { cost, prev } : coût min pour partitionner verses[0..i-1]
-  const dp = new Array(n + 1).fill(null);
-  dp[0] = { cost: 0, prev: -1 };
+  // dp[i][k] = { cost, prev } : coût min pour partitionner verses[0..i-1] EN EXACTEMENT k groupes
+  const dp = [];
+  for (let i = 0; i <= n; i++) {
+    dp.push(new Array(maxGroups + 1).fill(null));
+  }
+  dp[0][0] = { cost: 0, prev: -1 };
 
   for (let i = 1; i <= n; i++) {
-    for (let j = i - 1; j >= 0; j--) {
-      const lines = uniqueLines(j, i);
-      if (lines > MAX_LINES_PER_DAY) break;   // groupe trop grand, et tout groupe plus large sera pire
-      const dev = lines - LINES_PER_DAY;
-      const groupCost = dev * dev;
-      const total = dp[j].cost + groupCost;
-      if (dp[i] === null || total < dp[i].cost) {
-        dp[i] = { cost: total, prev: j };
+    for (let k = 1; k <= maxGroups; k++) {
+      for (let j = i - 1; j >= 0; j--) {
+        if (!dp[j][k - 1]) continue;
+        const lines = uniqueLines(j, i);
+        if (lines > MAX_LINES_PER_DAY) break;   // toutes les itérations plus larges seront pires
+        const dev = lines - LINES_PER_DAY;
+        const groupCost = dev * dev;
+        const total = dp[j][k - 1].cost + groupCost;
+        if (dp[i][k] === null || total < dp[i][k].cost) {
+          dp[i][k] = { cost: total, prev: j };
+        }
       }
     }
   }
 
+  // Trouver le meilleur k (favorise plus de groupes en cas d'égalité = partition plus douce)
+  let bestK = -1, bestCost = Infinity;
+  for (let k = 1; k <= maxGroups; k++) {
+    if (dp[n][k] && dp[n][k].cost < bestCost) {
+      bestCost = dp[n][k].cost;
+      bestK = k;
+    }
+  }
+
+  // Fallback : si impossible en ≤ maxGroups (page très dense), relâche la contrainte
+  if (bestK === -1) {
+    return dpPartition(verses, maxGroups + 1);
+  }
+
   // Reconstruction
   const groups = [];
-  let i = n;
+  let i = n, k = bestK;
   while (i > 0) {
-    const j = dp[i].prev;
+    const j = dp[i][k].prev;
     const groupVerses = verses.slice(j, i);
     const lineSet = new Set();
     groupVerses.forEach(v => v.lineKeys.forEach(lk => lineSet.add(lk)));
     groups.unshift({ verses: groupVerses, nLines: lineSet.size });
     i = j;
+    k--;
   }
   return groups;
 }
